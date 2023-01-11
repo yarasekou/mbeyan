@@ -1,0 +1,39 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title 'La structure du client' %}
+
+{% block body %}
+    <div class="col-md-10 offset-md-1">
+        <div class="card mt-5">
+            <div class="card-body">
+                <p class="text-center">
+                    <img src="/images/structures/{{ structure.logoStructure }}" width="200px" height="200px"
+                         alt="logo de la structure">
+                </p>
+                <hr>
+                <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-calendar"></i> INSCRIPTION<span
+                            class="text-center">&nbsp; {{ structure.createdAt|date('d-m-Y') }}</span></h3>
+                <hr>
+                <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-map-marked"></i> ADRESSE <span
+                            class="text-center">&nbsp; {{ structure.adresse }}</span></h3>
+                <hr>
+                <h3 class="text-center">&nbsp;&nbsp;&nbsp;&nbsp;<i class="fa fa-phone-alt"></i> TELEPHONE<span
+                            class="text-center">{{ structure.telephone }}</span></h3>
+                <hr>
+                <h3 class="font-weight-bolder text-uppercase">Les utilisateurs de {{ structure.name }}</h3>
+                {% for user in structure.kohUtilisateurs %}
+                    <hr>
+                    <h3>{{ user.firstName }} {{ user.lastName }} <a
+                                class="float-right btn btn-sm btn-success"
+                                href="{{ path('koh_utilisateur_show', { 'id': user.id }) }}"><i
+                                    class="fa fa-eye"></i></a></h3>
+                    <hr>
+                {% endfor %}
+                <button class="btn btn-lg btn-block btn-primary text-uppercase">Nombre de bien enregistré
+                    : {{ nbBien }}</button>
+                <button class="btn btn-lg btn-block btn-primary text-uppercase mt-3">Nombre d'expertises
+                    : {{ nbExpertise }}</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

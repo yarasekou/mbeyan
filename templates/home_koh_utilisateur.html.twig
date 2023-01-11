@@ -1,0 +1,13 @@
+{% extends "base_koh_utilisateur.html.twig" %}
+
+{% block title 'Mbeyan: Accueil gestion des biens' %}
+
+{% block body %}
+    <div class="container">
+        <div class="jumbotron">
+            <h3 class="font-weight-bolder text-uppercase text-center">Bienvenu(e)
+                cher(e) {{ app.user.firstName }} {{ app.user.lastName }}</h3>
+            <p class="text-center text-uppercase font-weight-bolder mt-5">La page de gestion des biens de mbeyan !</p>
+        </div>
+    </div>
+{% endblock %}

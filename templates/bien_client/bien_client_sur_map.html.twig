@@ -1,0 +1,1046 @@
+{% extends 'menu_bien_client_sur_map.html.twig' %}
+
+{% block title %} Les biens sur map {% endblock %}
+
+ {% block flitre %}
+     <div class="col-md-12">
+         <h5 class="font-weight-bolder text-uppercase text-center mt-3">FILTRE DES BIENS</h5>
+
+         <p class="text-center">
+             <button class="btn btn-success d-none" type="button" id="COCHER">TOUT COCHER/DECOCHER</button>
+         </p>
+         <ul class="list-group mt-3 mr-3 ml-3" id="list-biens">
+
+         </ul>
+         <p class="text-center font-weight-bold mt-3 text-uppercase d-none" id="total_montant"></p>
+         <div class="btn-group-sm text-center mt-3">
+             <button class="btn btn-success btn-sm d-none" type="button" id="btn-total">TOTALE</button>
+             <button class="btn btn-success btn-sm d-none" type="button" id="btn-export">EXPORTER</button>
+         </div>
+     </div>
+ {% endblock %}
+
+{% block stylesheets %}
+    <script type="text/javascript" src="{{ asset('dashboard/js/bootstrap-multiselect.js') }}"></script>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/bootstrap-multiselect.css') }}" type="text/css"/>
+    <script src="{{ asset('dashboard/js/cluster.js') }}"></script>
+    <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&callback=googleMapLoader&libraries=&v=weekly"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <div class="card-header">
+            <div class="alert alert-primary d-none text-uppercase font-weight-bolder text-center" id="successAlert">
+                Resultat filtre
+            </div>
+            <div class="alert alert-danger d-none text-uppercase font-weight-bolder text-center" id="dangerAlert">
+                Pas de résultat
+            </div>
+            <div class="alert alert-info d-none text-uppercase font-weight-bolder text-center" id="allDataAlert">
+                Tous les biens de {{ app.user.structure.name }}
+            </div>
+            <button type="button" class="btn btn-primary float-right" data-toggle="modal"
+                    data-target="#exampleModalCenter">
+                FILTRER LES BIENS
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="map" style="height: 600px; width: 100%"></div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-success" id="exportAllData"><i class="fas fa-file-excel"></i>&nbsp;EXPORT TOUT
+            </button>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLongTitle">Filtre de
+                        biens</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="col-md-12 font-weight-bolder">
+                        <div class="form-group mb-2" id="formClientStructure">
+                            <label for="clientStructure"><u>CLIENT STRUCTURE</u></label>
+                            <input type="text" class="form-control" id="clientStructure"
+                                   placeholder="NOM DU CLIENT {{ app.user.structure.name|upper }}">
+                        </div>
+                        <hr>
+                        <div class="form-row align-items-end mt-2 mb-2">
+                            <div class="col-md-6 form-group">
+                                <label for="filterRegion"><u>REGION</u></label>
+                                <select id="filterRegion" name="region" class="form-control text-center text-uppercase">
+                                    <option value="">-- CHOISIR LA REGION --</option>
+                                    {% for region in regions %}
+                                        <option value="{{ region.id }}">{{ region.name|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="filterCercle"><u>CERCLE</u></label>
+                                <select id="filterCercle" name="cercle" class="form-control text-center text-uppercase">
+                                    <option value="">-- CHOISIR LE CERCLE --</option>
+                                    {% for cercle in cercles %}
+                                        <option value="{{ cercle.id }}">{{ cercle.name|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row align-items-end mt-2 mb-2">
+                            <div class="col-md-6 form-group">
+                                <label for="filterTF"><u>TF</u></label>
+                                <input type="text" id="filterTF" class="form-control text-center text-uppercase"
+                                       placeholder="RECHERCHER PAR TF">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="filterQuartier">QUARTIER</label>
+                                <select name="filterQuartier" id="filterQuartier" class="form-control text-uppercase">
+                                    <option value="">-- CHOISIR LE QUARTIER --</option>
+                                    {% for quartier in quartiers %}
+                                        <option value="{{ quartier.id }}">{{ quartier.name|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row align-items-end mt-2 mb-2">
+                            <div class="col-md-6 form-group">
+                                <label for="numeroExpertise"><u>EXPERTISE</u></label>
+                                <input type="text" name="numeroExpertise" id="numeroExpertise" class="form-control"
+                                       placeholder="NUMERO EXPERTISE">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="numeroMbeyan"><u>MBEYAN</u></label>
+                                <input type="text" name="numeroMbeyan" id="numeroMbeyan" class="form-control"
+                                       placeholder="NUMERO MBEYAN">
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentDateFInDation">
+                            <p class="font-weight-bolder"><u>DATE FIN DATION</u></p>
+                            <div class="form-row align-items-end mt-2 mb-2">
+                                <div class="col-md-6 form-group">
+                                    <label for="dateDebutDation"><u>INF</u></label>
+                                    <input type="date" class="form-control" id="dateDebutDation">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="dateFinDation"><u>SUP</u></label>
+                                    <input type="date" class="form-control" id="dateFinDation">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentDateSortiImmobilisation">
+                            <p class="font-weight-bolder"><u>DATE SORTI IMMOBILISATION</u></p>
+                            <div class="form-row align-items-end mt-2 mb-2">
+                                <div class="col-md-6 form-group">
+                                    <label for="dateDebutImmobilisation"><u>INF</u></label>
+                                    <input type="date" class="form-control" id="dateDebutImmobilisation">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="dateFinImmobilisation"><u>SUP</u></label>
+                                    <input type="date" class="form-control" id="dateFinImmobilisation">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentType" class="form-row mt-2 mb-2">
+                            <div class="col-md-6 form-group">
+                                <label for="typeDocumentFilter"><u>DOCUMENT</u></label>
+                                <select name="typeDocumentFilter" class="form-control" id="typeDocumentFilter">
+                                    <option value="">-- CHOISIR TYPE DOCUMENT --</option>
+                                    {% for typeDocument in typeDocuments %}
+                                        <option value="{{ typeDocument.id }}">-- {{ typeDocument.name|upper }}--
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="typeAcquisitionFilter"><u>ACQUISITION</u></label>
+                                <select name="typeAcquisitionFilter[]"
+                                        id="typeAcquisitionFilter" multiple="multiple">
+                                    {% for typeAcquisition in typeAcquisitions %}
+                                        <option value="{{ typeAcquisition.id }}">{{ typeAcquisition.name|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentTypeBien" class="form-row mt-2 mb-2">
+                            <div class="col-md-6 form-group">
+                                <label for="typeUsageBienFilter"><u>USAGE BIEN</u></label>
+                                <select name="typeUsageBienFilter" class="form-control" id="typeUsageBienFilter">
+                                    <option value="">-- CHOISIR TYPE USAGE --</option>
+                                    {% for typeUsageBien in typeUsageBiens %}
+                                        <option value="{{ typeUsageBien.id }}">-- {{ typeUsageBien.name|upper }}--
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="typeBienFilter"><u>TYPE BIEN</u></label>
+                                <select name="typeBienFilter" class="form-control" id="typeBienFilter">
+                                    <option value="">-- CHOISIR TYPE BIEN --</option>
+                                    {% for typeBien in typeBiens %}
+                                        <option value="{{ typeBien.id }}">-- {{ typeBien.name|upper }}--
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentPrixEvaluation">
+                            <p><u>PRIX EVALUATION</u></p>
+                            <div class="form-row align-items-end mt-2 mb-2">
+                                <div class="col-md-6 form-group">
+                                    <label for="prixInf"><u>INF</u></label>
+                                    <input type="number" id="prixInf" class="form-control" name="prixEvaluationInf">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="prixSup"><u>SUP</u></label>
+                                    <input type="number" id="prixSup" class="form-control" name="prixEvaluationSup">
+                                </div>
+                            </div>
+                        </div>
+                        <div id="contentDateEValuation" class="mt-2 mb-2">
+                            <p><u>DATE DERNIERE EVALUATION</u></p>
+                            <div class="form-row align-items-end">
+                                <div class="col-md-6 form-group">
+                                    <label for="dateInfLastEvaluation"><u>INF</u></label>
+                                    <input type="date" class="form-control" id="dateInfLastEvaluation">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="dateSupLastEvaluation"><u>SUP</u></label>
+                                    <input type="date" class="form-control" id="dateSupLastEvaluation">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div id="contentDateEValuation" class="mt-2 mb-2">
+                            <p><u>DATE PROCHAINE EVALUATION</u></p>
+                            <div class="form-row align-items-end">
+                                <div class="col-md-6 form-group">
+                                    <label for="dateInfNextEvaluation"><u>INF</u></label>
+                                    <input type="date" class="form-control" id="dateInfNextEvaluation">
+                                </div>
+                                <div class="col-md-6 form-group">
+                                    <label for="dateSupNextEvaluation"><u>SUP</u></label>
+                                    <input type="date" class="form-control" id="dateSupNextEvaluation">
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-center btn-group" role="group">
+                            <button id="btnReset" type="button" class="btn btn-warning text-uppercase">Reinitialiser
+                            </button>
+                            <button id="btnSend" type="button" class="btn btn-primary">APPLIQUER</button>
+                            <button type="button" class="btn btn-danger text-uppercase" data-dismiss="modal">Fermer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="userLoggedId" value="{{ id }}">
+
+    {# TABLE EXPORT DES DONNEES #}
+    <div class="table-responsive d-none">
+        <table id="tableExport" style="white-space: nowrap"
+               class="table diplay table-hover table-bordered text-center font-weight-bold text-uppercase">
+            <thead>
+            <tr class="bg-gradient-dark text-white">
+
+                <th>N° EXPERTISE</th>
+
+                <th>N° DOCUMENT</th>
+
+                <th>N° MBEYAN</th>
+
+                <th>QUARTIER</th>
+
+                <th>CERCLE</th>
+
+                <th>REGION</th>
+
+                <th>PRIX EXPERTISE</th>
+
+                <th>CLIENT</th>
+
+                <th>PROPRIETAIRE</th>
+
+                <th>SUR LE DOCUMENT</th>
+
+                <th>TYPE ACQUISITION</th>
+
+                <th>DOCUMENT PROPRIETE</th>
+
+                <th>TYPE BIEN</th>
+
+                <th>TYPE USAGE</th>
+
+                <th>SUPERFICIE</th>
+
+                <th>LATITUDE</th>
+
+                <th>LONGITUDE</th>
+
+                <th>DATE DERNIERE EVALUATION</th>
+
+                <th>DATE PROCHAINE EVALUATION</th>
+
+                <th>DATE ENTREE</th>
+
+                <th>DATE SORTIE IMMOBILISATION</th>
+
+                <th>DATE FIN DATION</th>
+
+                <th>ENREGISTRE LE</th>
+
+                <th>ENREGISTRE PAR</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="//cdn.rawgit.com/rainabba/jquery-table2excel/1.1.0/dist/jquery.table2excel.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#typeAcquisitionFilter').multiselect({
+                templates: {
+                    li: '<a class"multiselect-option dropdown-item"><a><label style="display:inline;"></label><input type="text" /></a></a>'
+                }
+            });
+        });
+    </script>
+    <script>
+        let clientFilter = $('#clientFilter');
+        let clientStructure = $('#clientStructure');
+        let tfFilter = $('#filterTF');
+        let quartierFilter = $('#filterQuartier');
+        let regionFilter = $('#filterRegion');
+        let cercleFilter = $('#filterCercle');
+        let numeroExpertiseFilter = $('#numeroExpertise');
+        let numeroMbeyanFilter = $('#numeroMbeyan');
+        let dateDebutDation = $('#dateDebutDation');
+        let dateFinDation = $('#dateFinDation');
+        let dateDebutImmobilisation = $('#dateDebutImmobilisation');
+        let dateFinImmobilisation = $('#dateFinImmobilisation');
+        let typeDocumentFilter = $('#typeDocumentFilter');
+        let typeAcquisitionFilter = $('#typeAcquisitionFilter');
+        let typeUsageBienFilter = $('#typeUsageBienFilter');
+        let typeBienFilter = $('#typeBienFilter');
+        let prixEstimationFilterInf = $('#prixInf');
+        let prixEstimationFilterSup = $('#prixSup');
+        let dateEvaluationInfFilter = $('#dateInfLastEvaluation');
+        let dateEvaluationSupFilter = $('#dateSupLastEvaluation');
+        let dateNextEvaluationInfFilter = $('#dateInfNextEvaluation');
+        let dateNextEvaluationSupFilter = $('#dateSupNextEvaluation');
+
+        let btnSend = $('#btnSend');
+        let btnReset = $('#btnReset');
+        let btnCocher = $('#COCHER');
+        let btnTotal = $('#btn-total');
+        let btnExporter = $('#btn-export');
+
+        let isChecked = false;
+        let nbreBien = 0;
+        let allDatats = {};
+
+        let btnExportAllData = $('#exportAllData');
+
+        // CHARGEMENT DU MAP POUR LA PREMIERE FOIS
+        function googleMapLoader() {
+            $.ajax({
+                url: '/koh_archivage/admin/biens-clients/get_biens',
+                dataType: 'json',
+                type: 'get',
+                success: function (data) {
+                    changementEtatAlert('all', true);
+                    window.setTimeout(function () {
+                        changementEtatAlert('all', false);
+                    }, 5000);
+                    "use strict";
+                    allDatas = data;
+                    document.getElementById('')
+                    initMap(data, false);
+                }
+            });
+        }
+
+        // INITIALISATION DU MAP
+        function initMap(data, isSearch) {
+            nbreBien = data.length;
+            console.log('taille == ' + data.length);
+            allDatas = data;
+            let position = {
+                lat: 12.6392316,
+                lng: -8.0028892
+            };
+            let mapOptions = {
+                zoom: 4,
+                center: position,
+                mapTypeId: 'hybrid',
+                labels: true
+            };
+            let map = new google.maps.Map(document.getElementById("map"), mapOptions);
+            let cpt = 0;
+            const markers = data.map((d) => {
+                position = {
+                    lat: 12.6392316,
+                    lng: -8.0028892
+                };
+                if ((d.latitude !== null || d.longitude !== null) && (isFinite(+d.latitude) && Math.abs(+d.latitude) <= 90) && (isFinite(+d.longitude) && Math.abs(+d.longitude) <= 180)) {
+                    position = {
+                        lat: +d.latitude,
+                        lng: +d.longitude
+                    };
+                }
+
+                let next_date_estimation = transformDate(d.next_evaluation_date.date);
+                let date_entree = '';
+                let date_sortie_immobilisation = '';
+                let date_fin_dation = '';
+                if (d.date_entree != null) {
+                    date_entree = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_entree.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_sortie_immobilisation != null) {
+                    date_sortie_immobilisation = "<li class=\"mt-2\"><strong>Date Sortie immobilisation : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_sortie_immobilisation.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_fin_dation != null) {
+                    date_fin_dation = "<li class=\"mt-2\"><strong>Date fin dation : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_fin_dation.date)
+                    ) + "</span></strong></li>";
+                }
+                let title = d.type_document.toUpperCase() + ' ' + d.numero_document.toUpperCase() + ' /' + d.quartier.libelle.toUpperCase();
+                let icon;
+                if (d.type_aquisition.for_structure === true) {
+                    icon = {
+                        url: "https://maps.google.com/mapfiles/ms/icons/red.png",
+                    };
+                } else {
+                    icon = {
+                        url: "https://maps.google.com/mapfiles/ms/icons/blue.png",
+                    };
+                }
+                let marker = new google.maps.Marker({
+                    position: position,
+                    map: map,
+                    label: {
+                        text: title,
+                        fontWeight: 'bold',
+                        color: 'black',
+                        fontSize: '12px',
+                        content: title
+                    },
+                    icon: icon
+                });
+                let head = '';
+                if (d.structure !== null) {
+                    head = 'Bien pour ' + d.structure.nom;
+                } else {
+                    head = 'BIEN POUR ' + d.koh_utilisateur.nom + ' ' + d.koh_utilisateur.prenom;
+                }
+                const contentString = "<div id=\"content\">\n" + "        <div id=\"siteNotice\"></div>\n" + "        <h5 id=\"firstHeading\" class=\"firstHeading text-uppercase\">" + head + "</h5>\n" + "        <div id=\"bodyContent\">\n" + "<ul class=\"list-group text-uppercase\">\n" + "        <li class=\"mt-2\"><strong>Latitude : " + d.latitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Longitude " + d.longitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Surface : " + d.superficie + " m² </strong></li>\n" + "        <li class=\"mt-2\"><strong>document : " + d.numero_document + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier expertise : " + d.dossier_koh + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier mbeyan : " + d.dossier_mbeyan + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Type acquisition : " + d.type_aquisition.libelle + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Date prochiane evaluation : <span class=\"text-danger font-weight-bold\" id='days'>" + next_date_estimation + " </strong></li>\n" + "        " + date_entree + " \n" + "        " + date_sortie_immobilisation + " \n" + "        " + date_fin_dation + " \n" + "         <p class=\"text-center mt-3\"><a href='" + d.lien + "'>cliquer sur ce lien pour plus de detail</a></p>\n" + "    </ul>\n" + "</div>";
+                let content = '<ul class="list-group">\n' + '        <li class="list-group-item"> DOCUMENT : ' + d.numero_document.toUpperCase() + '</li>\n' + '        <li class="list-group-item">EXPERTISE : ' + d.dossier_koh.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE ACQUISITION : ' + d.type_aquisition.libelle.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE DOCUMENT : ' + d.type_document.toUpperCase() + '</li>\n' + '    </ul>';
+                if (isSearch) {
+                    document.getElementById('sidebar').classList.add('c-sidebar-lg-show');
+                    $('#list-biens').append("<li id=\"list-item" + (d.expertiseId) + "\" class=\"list-group-item-info list-unstyled text-danger border-danger mb-3\"><label for=\"check" + (d.expertiseId) + "\"></label><input value=\"" + d.expertiseId + " \" id=\"check" + d.expertiseId + "\" type=\"checkbox\"\n" + "class=\"form-check-inline\">" + d.numero_document.toUpperCase() + "\n" + "<br><span class=\"ml-3 small\">" + d.quartier.libelle.toUpperCase() + "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" + d.type_document.toUpperCase() + "</span> " + "<br><span class=\"ml-3 small\">PRIX : <strong>" + String(d.prix_derniere_evaluation).replace(/(.)(?=(\d{3})+$)/g, '$1,') + "</strong> FCFA</span> " + "                    </li>");
+                } else {
+                    document.getElementById('sidebar').classList.remove('c-sidebar-lg-show');
+                }
+                const infowindow = new google.maps.InfoWindow({content: contentString});
+                const infoW = new google.maps.InfoWindow({content: content});
+                marker.addListener('click', function () {
+                    infowindow.open(map, marker);
+                });
+                google.maps.event.addListener(infoW, 'closeclick', function () {
+
+                });
+
+                google.maps.event.addListener(infowindow, 'closeclick', function () {
+                    infowindow.close();
+                });
+                return marker;
+            });
+            new markerClusterer.MarkerClusterer({map, markers});
+        }
+
+        function transformDate(dateInit) {
+            let deadLine = new Date(dateInit).getTime();
+            let now = new Date().getTime();
+            let t = deadLine - now;
+            let days = Math.floor(t / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((t % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let min = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+            let sec = Math.floor((t % (1000 * 60)) / 1000);
+            return days + ' jour ' + hours + ' h ' + min + ' min ' + sec + ' s';
+        }
+
+        regionFilter.on('change', function (e) {
+            cercleFilter.empty();
+            let val = e.target.value;
+            if (val !== '') {
+                loadCercle(+val);
+            }
+        });
+
+        function loadCercle(id) {
+            $.ajax({
+                url: '/cercle/region_by_cercle/' + id,
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    console.log('data ' + data.length);
+                    $('#filterCercle').empty().append($('<option>', {
+                        value: '',
+                        text: '-- Selectionner un cercle --'
+                    }));
+
+                    $.each(data, function (index, cercle) {
+                        $('#filterCercle').append($('<option>', {
+                            value: cercle['id'],
+                            text: cercle['libelle']
+                        }));
+                    });
+                }
+            });
+        }
+
+        cercleFilter.on('change', function (e) {
+            quartierFilter.empty();
+            let val = e.target.value;
+            if (val !== '') {
+                loadQuartiers(+val);
+            }
+        });
+
+        function loadQuartiers(id) {
+            $.ajax({
+                url: '/quartiers/quartier_by_cercle_id/' + id,
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    $('#filterQuartier').empty().append($('<option>', {
+                        value: '',
+                        text: '-- Selectionner un quartier --'
+                    }));
+
+                    $.each(data, function (index, quartier) {
+                        $('#filterQuartier').append($('<option>', {
+                            value: quartier['id'],
+                            text: quartier['libelle'].toUpperCase()
+                        }));
+                    });
+                }
+            });
+        }
+
+        function getKohClientByType(typeClient) {
+            clientFilter.empty();
+            $.ajax({
+                url: '/koh_utilisateur/clients_by_type',
+                type: 'POST',
+                dataType: 'JSON',
+                data: {'type': typeClient},
+                success: function (data) {
+                    clientFilter.append($('<option>', {
+                        value: '',
+                        text: '-- CHOISIR UN CLIENT --'
+                    }));
+                    let cpt = 0;
+                    $.each(data, function (index, d) {
+                        if (cpt === 0 && d.type !== undefined && d.type === 'structure') {
+                            document.getElementById('formClientStructure').classList.remove('d-none');
+                        } else {
+                            document.getElementById('formClientStructure').classList.add('d-none');
+                        }
+                        clientFilter.append($('<option>', {
+                            value: d['id'],
+                            text: d['email']
+                        }));
+                    });
+                    document.getElementById('formClientFilter').classList.remove('d-none');
+                },
+                error: function (error) {
+                    console.log('error => ' + error);
+                }
+            })
+        }
+
+        btnSend.on('click', function () {
+            let isValidated = true;
+            let dataSumitted = {};
+            let numeroCompteClientStructureValue = document.getElementById('clientStructure').value;
+            let tfFilterValue = document.getElementById('filterTF').value;
+            let quartierFilterValue = document.getElementById('filterQuartier').value;
+            let regionFilterValue = document.getElementById('filterRegion').value;
+            let cercleFilterValue = document.getElementById('filterCercle').value;
+            let numeroExpertiseValue = document.getElementById('numeroExpertise').value;
+            let numeroMbeyanValue = document.getElementById('numeroMbeyan').value;
+            let dateDebutDationValue = document.getElementById('dateDebutDation').value;
+            let dateFinDationValue = document.getElementById('dateFinDation').value;
+            let dateDebutImmobilisationValue = document.getElementById('dateDebutImmobilisation').value;
+            let dateFinImmobilisationValue = document.getElementById('dateFinImmobilisation').value;
+            let typeDocumentFilterValue = document.getElementById('typeDocumentFilter').value;
+            let typeUsageBienValue = document.getElementById('typeUsageBienFilter').value;
+            let typeBienValue = document.getElementById('typeBienFilter').value;
+            let prixEstimationInfValue = document.getElementById('prixInf').value;
+            let prixEstimationSupValue = document.getElementById('prixSup').value;
+            let dateInfLastEvaluationValue = document.getElementById('dateInfLastEvaluation').value;
+            let dateSupLastEvaluationValue = document.getElementById('dateSupLastEvaluation').value;
+            let dateInfNextEvaluationValue = document.getElementById('dateInfNextEvaluation').value;
+            let dateSupNextEvaluationValue = document.getElementById('dateSupNextEvaluation').value;
+            let userId = document.getElementById('userLoggedId').value;
+
+            let dateError = false;
+            let errorPrixEstimation = false;
+            let isEmpty = true;
+
+            if (numeroCompteClientStructureValue !== '') {
+                dataSumitted.numeroCompteClientStructure = numeroCompteClientStructureValue;
+                isEmpty = false;
+            }
+
+            if (tfFilterValue !== '') {
+                dataSumitted.tf = tfFilterValue;
+                isEmpty = false;
+            }
+
+            if (quartierFilterValue !== '') {
+                dataSumitted.quartierFilter = quartierFilterValue;
+                isEmpty = false;
+            }
+
+            if (regionFilterValue !== '') {
+                dataSumitted.regionFilter = regionFilterValue;
+                isEmpty = false;
+            }
+
+            if (cercleFilterValue !== '') {
+                dataSumitted.cercleFilter = cercleFilterValue;
+                isEmpty = false;
+            }
+
+            if (numeroExpertiseValue !== '') {
+                dataSumitted.numeroExpertise = numeroExpertiseValue;
+            }
+            if (numeroMbeyanValue !== '') {
+                dataSumitted.numeroMbeyan = numeroMbeyanValue;
+            }
+            if ((dateDebutDationValue === '' && dateFinDationValue !== '') || (dateDebutDationValue !== '' && dateFinDationValue === '') || (dateDebutDationValue > dateFinDationValue)) {
+                document.getElementById('dateFinDation').classList.add('is-invalid');
+                document.getElementById('dateDebutDation').classList.add('is-invalid');
+                isValidated = false;
+                dateError = true;
+                alert('error dation');
+            } else {
+                if (dateDebutDationValue !== '' && dateFinDationValue !== '') {
+                    dataSumitted.dateFinDation = dateFinDationValue;
+                    dataSumitted.dateDebutDation = dateDebutDationValue;
+                    isEmpty = false;
+                }
+            }
+            if ((dateDebutImmobilisationValue !== '' && dateFinImmobilisationValue === '') || (dateDebutImmobilisationValue === '' && dateFinImmobilisationValue !== '') || (dateDebutImmobilisationValue > dateFinImmobilisationValue)) {
+                document.getElementById('dateDebutImmobilisation').classList.add('is-invalid');
+                document.getElementById('dateFinImmobilisation').classList.add('is-invalid');
+                dateError = true;
+                isValidated = false;
+            } else {
+                if (dateDebutImmobilisationValue !== '' && dateFinImmobilisationValue !== '') {
+                    dataSumitted.dateFinImmobilisation = dateFinImmobilisationValue;
+                    dataSumitted.dateDebutImmobilisation = dateDebutImmobilisationValue;
+                    isEmpty = false;
+                }
+            }
+            if (typeDocumentFilterValue !== '') {
+                dataSumitted.typeDocument = typeDocumentFilterValue;
+                isEmpty = false;
+            }
+            let typeAcquisitionValues = $('#typeAcquisitionFilter').val();
+            if (typeAcquisitionValues.length !== 0) {
+                dataSumitted.typeAcquisition = typeAcquisitionValues;
+                isEmpty = false;
+            }
+            if (typeUsageBienValue !== '') {
+                dataSumitted.typeUsageBien = +typeUsageBienValue;
+                isEmpty = false;
+            }
+            if (typeBienValue !== '') {
+                dataSumitted.typeBien = +typeBienValue;
+                isEmpty = false;
+            }
+
+            if ((prixEstimationInfValue !== '' && prixEstimationSupValue === '') || (prixEstimationInfValue === '' && prixEstimationSupValue !== '') || (prixEstimationInfValue > prixEstimationSupValue) || (prixEstimationInfValue < 0 || prixEstimationSupValue < 0)) {
+                document.getElementById('prixInf').classList.add('is-invalid');
+                document.getElementById('prixSup').classList.add('is-invalid');
+                errorPrixEstimation = true;
+                isValidated = false;
+                alert('error estiamation');
+            } else {
+                if (prixEstimationSupValue !== '' && prixEstimationInfValue !== '') {
+                    dataSumitted.prixEstimationInf = +prixEstimationInfValue;
+                    dataSumitted.prixEstimationSup = +prixEstimationSupValue;
+                    isEmpty = false;
+                }
+            }
+
+            if ((dateInfLastEvaluationValue !== '' && dateSupLastEvaluationValue === '') || (dateInfLastEvaluationValue === '' && dateSupLastEvaluationValue !== '') || (dateInfLastEvaluationValue > dateSupLastEvaluationValue)) {
+                document.getElementById('dateInfLastEvaluation').classList.add('is-invalid');
+                document.getElementById('dateSupLastEvaluation').classList.add('is-invalid');
+                dateError = true;
+                isValidated = false;
+            } else {
+                if (dateInfLastEvaluationValue !== '' && dateSupLastEvaluationValue !== '') {
+                    dataSumitted.dateInfLastEvaluation = dateInfLastEvaluationValue;
+                    dataSumitted.dateSupLastEvaluation = dateSupLastEvaluationValue;
+                    isEmpty = false;
+                }
+            }
+            if ((dateInfNextEvaluationValue !== '' && dateSupNextEvaluationValue === '') || (dateInfNextEvaluationValue === '' && dateSupNextEvaluationValue !== '') || (dateInfNextEvaluationValue > dateSupNextEvaluationValue)) {
+                document.getElementById('dateInfNextEvaluation').classList.add('is-invalid');
+                document.getElementById('dateSupNextEvaluation').classList.add('is-invalid');
+                dateError = true;
+                isValidated = false;
+            } else {
+                if (dateInfNextEvaluationValue !== '' && dateSupNextEvaluationValue !== '') {
+                    dataSumitted.dateInfNextEvaluation = dateInfNextEvaluationValue;
+                    dataSumitted.dateSupNextEvaluation = dateSupNextEvaluationValue;
+                    isEmpty = false;
+                }
+            }
+
+            if (errorPrixEstimation) {
+                alert('Verifiez les prix evalutions');
+            }
+
+            if (dateError) {
+                alert('verifiez date inf et sup');
+            }
+
+            if (isValidated && isEmpty === false) {
+                document.getElementById('dateDebutImmobilisation').classList.remove('is-invalid');
+                document.getElementById('dateFinImmobilisation').classList.remove('is-invalid');
+                document.getElementById('dateDebutImmobilisation').classList.remove('is-invalid');
+                document.getElementById('dateFinImmobilisation').classList.remove('is-invalid');
+                document.getElementById('dateInfNextEvaluation').classList.remove('is-invalid');
+                document.getElementById('dateSupNextEvaluation').classList.remove('is-invalid');
+                document.getElementById('dateInfLastEvaluation').classList.remove('is-invalid');
+                document.getElementById('dateSupLastEvaluation').classList.remove('is-invalid');
+                document.getElementById('prixInf').classList.remove('is-invalid');
+                document.getElementById('prixSup').classList.remove('is-invalid');
+                if (dataSumitted !== []) {
+                    dataSumitted.userId = userId;
+                    getData(dataSumitted);
+                }
+
+                console.log('data == ' + JSON.stringify(dataSumitted));
+                $('#exampleModalCenter').modal('hide');
+            }
+        });
+
+        function getData(critere) {
+            document.getElementById('total_montant').classList.add('d-none');
+            for (let i = 1; i <= allDatats; i++) {
+                $('#list-biens #list-item' + allDatas[i].expertiseId).remove();
+            }
+            $.ajax({
+                url: '/koh-archivage/get-biens-by-critere-and-user',
+                dataType: 'JSON',
+                type: 'POST',
+                data: critere,
+                success: function (data) {
+                    allDatas = data;
+                    if (data.length >= 2) {
+                        document.getElementById('COCHER').classList.remove('d-none');
+                    } else {
+                        document.getElementById('COCHER').classList.add('d-none');
+                    }
+                    if (data.length >= 1) {
+                        document.getElementById('btn-total').classList.remove('d-none');
+                        document.getElementById('btn-export').classList.remove('d-none');
+                        changementEtatAlert('success', true);
+                        window.setTimeout(function () {
+                            changementEtatAlert('success', false);
+                        }, 5000);
+                    } else {
+                        changementEtatAlert('danger', true);
+                        document.getElementById('btn-total').classList.add('d-none');
+                        document.getElementById('btn-export').classList.add('d-none');
+                        window.setTimeout(function () {
+                            changementEtatAlert('danger', false);
+                        }, 5000);
+                    }
+                    initMap(data, true);
+                },
+                error: function (error) {
+                    alert('error => ' + JSON.stringify(error));
+                }
+            })
+        }
+
+        btnReset.on('click', function () {
+            if (confirm('Êtes-vous sûr(e) ?')) {
+                resetModal();
+                googleMapLoader();
+                $('#exampleModalCenter').modal('hide');
+            }
+        });
+
+        function resetModal() {
+            clientStructure.val('');
+            tfFilter.val('');
+            quartierFilter.val('');
+            numeroExpertiseFilter.val('');
+            numeroMbeyanFilter.val('');
+            dateDebutDation.val('');
+            dateFinDation.val('');
+            dateDebutImmobilisation.val('');
+            dateFinImmobilisation.val('');
+            typeDocumentFilter.val('');
+            typeAcquisitionFilter.val('');
+            typeUsageBienFilter.val('');
+            typeBienFilter.val('');
+            prixEstimationFilterInf.val('');
+            prixEstimationFilterSup.val('');
+            dateEvaluationInfFilter.val('');
+            dateEvaluationSupFilter.val('');
+        }
+
+        btnCocher.on('click', function () {
+            if (!isChecked) {
+                $("#list-biens > li").each(function (index) {
+                    $(this).find('input').prop('checked', true);
+                });
+                isChecked = true;
+            } else {
+                $("#list-biens > li").each(function (index) {
+                    $(this).find('input').prop('checked', false);
+                });
+                isChecked = false;
+            }
+        });
+
+        btnTotal.on('click', function () {
+            let isCheck = false;
+            let total = 0;
+            let data = [];
+            for (let i = 0; i < allDatas.length; i++) {
+                if ($('#check' + allDatas[i].expertiseId).prop('checked') === true) {
+                    isCheck = true;
+                    let id = $('#check' + allDatas[i].expertiseId).val();
+                    data.push(id);
+                }
+            }
+            console.log('data == ' + data.toString());
+            $.ajax({
+                url: "/koh-archivage/biens-by-array/" + data.toString() + '/order/region/type/ASC',
+                type: 'get',
+                datatype: 'json',
+                success: function (datas) {
+                    for (let i = 0; i < datas.length; i++) {
+                        let data = datas[i];
+                        total = (total + parseFloat(data.prix_derniere_evaluation));
+                    }
+                    if (isCheck) {
+                        document.getElementById('total_montant').classList.remove('d-none');
+                        $('#total_montant').text('TOTAL ' + String(total).replace(/(.)(?=(\d{3})+$)/g, '$1,') + ' FCFA');
+                    } else {
+                        alert('aucun bien selectionné');
+                        document.getElementById('total_montant').classList.add('d-none');
+                    }
+                }
+            });
+        });
+
+        btnExporter.on('click', function () {
+            let isCheck = false;
+            let data = [];
+            for (let i = 0; i < allDatas.length; i++) {
+                let d = allDatas[i];
+                if (d !== null && $('#check' + d.expertiseId).prop('checked') === true) {
+                    isCheck = true;
+                    let id = $('#check' + d.expertiseId).val();
+                    data.push(id);
+                }
+            }
+
+            $.ajax({
+                url: "/koh-archivage/biens-by-array/" + data.toString() + '/order/region/type/ASC',
+                type: 'get',
+                datatype: 'json',
+                success: function (datas) {
+                    console.log('taille == ' + datas.length);
+                    let table = $("#tableExport tbody");
+                    table.empty();
+                    for (let i = 0; i < datas.length; i++) {
+                        let data = datas[i];
+                        if (data !== null) {
+                            let date_entree = '';
+                            if (data.date_entree !== null) {
+                                date_entree = getFormattedDate(new Date(data.date_entree.date));
+                            }
+                            let date_sortie_immobilisation = '';
+                            if (data.date_sortie_immobilisation !== null) {
+                                date_sortie_immobilisation = getFormattedDate(new Date(data.date_sortie_immobilisation.date));
+                            }
+                            let date_fin_dation = '';
+                            if (data.date_fin_dation !== null) {
+                                date_fin_dation = getFormattedDate(new Date(data.date_fin_dation.date));
+                            }
+                            let client = '';
+                            if (data.client !== null) {
+                                client = data.client.nom;
+                            }
+
+                            let tr = '<tr>\n' + '<td>' + data.numero_expertise + '</td>\n'
+                                + '<td>' + data.numero_document + '</td>\n' +
+                                '<td>' + data.dossier_mbeyan + '</td>\n' +
+                                '<td>' + data.quartier.libelle + '</td>\n' +
+                                '<td>' + data.cercle.libelle + '</td>\n' +
+                                '<td>' + data.region.libelle + '</td>\n' +
+                                '<td>' + data.prix_derniere_evaluation + '</td>\n' +
+                                '<td>' + client + '</td>\n' +
+                                '<td>' + data.koh_utilisateur.nom + '</td>\n' +
+                                '<td>' + data.proprio + '</td>\n' +
+                                '<td>' + data.type_aquisition.libelle + '</td>\n' +
+                                '<td>' + data.type_document + '</td>\n' +
+                                '<td>' + data.type_bien.libelle + '</td>\n' +
+                                '<td>' + data.usage_bien.libelle + '</td>\n' +
+                                '<td>' + data.superficie + '</td>\n' +
+                                '<td>' + data.latitude + '</td>\n' +
+                                '<td>' + data.longitude + '</td>\n' +
+                                '<td>' + getFormattedDate(new Date(data.last_evaluation_date.date)) + '</td>\n' +
+                                '<td>' + getFormattedDate(new Date(data.next_evaluation_date.date)) + '</td>\n' +
+                                '<td>' + date_entree + '</td>\n' +
+                                '<td>' + date_sortie_immobilisation + '</td>\n' +
+                                '<td>' + date_fin_dation + '</td>\n' +
+                                '<td>' + getFormattedDate(new Date(data.createdAt.date)) + '</td>\n' +
+                                '<td>' + data.createdBy + '</td>\n</tr>';
+                            table.append(tr);
+                        }
+                    }
+                    if (isCheck) {
+                        $('#tableExport').table2excel({
+                            filename: "liste-de-bien-" + new Date().getDate() + "-" + new Date().getMonth() + "-" + new Date().getFullYear() + ".xls"
+                        });
+                    } else {
+                        alert('aucun bien selectionné');
+                    }
+                },
+                error: function (error) {
+                    console.log('error');
+                }
+            });
+        });
+
+        function getFormattedDate(date) {
+            let year = date.getFullYear();
+            let month = (1 + date.getMonth()).toString().padStart(2, '0');
+            let day = date.getDate().toString().padStart(2, '0');
+
+            return day + '/' + month + '/' + year;
+        }
+
+        function changementEtatAlert(alertType, show) {
+            if (alertType === 'all') {
+                if (show) {
+                    document.getElementById('allDataAlert').classList.remove('d-none');
+                } else {
+                    document.getElementById('allDataAlert').classList.add('d-none');
+                }
+            }
+
+            if (alertType === 'success') {
+                if (show) {
+                    document.getElementById('successAlert').classList.remove('d-none');
+                } else {
+                    document.getElementById('successAlert').classList.add('d-none');
+                }
+            }
+
+            if (alertType === 'danger') {
+                if (show) {
+                    document.getElementById('dangerAlert').classList.remove('d-none');
+                } else {
+                    document.getElementById('dangerAlert').classList.add('d-none');
+                }
+            }
+        }
+
+        btnExportAllData.on('click', function () {
+            let table = $("#tableExport tbody");
+            table.empty();
+            for (let i = 0; i < allDatas.length; i++) {
+                let data = allDatas[i];
+                if (data !== null) {
+                    let date_entree = '';
+                    if (data.date_entree !== null) {
+                        date_entree = getFormattedDate(new Date(data.date_entree.date));
+                    }
+                    let date_sortie_immobilisation = '';
+                    if (data.date_sortie_immobilisation !== null) {
+                        date_sortie_immobilisation = getFormattedDate(new Date(data.date_sortie_immobilisation.date));
+                    }
+                    let date_fin_dation = '';
+                    if (data.date_fin_dation !== null) {
+                        date_fin_dation = getFormattedDate(new Date(data.date_fin_dation.date));
+                    }
+                    let client = '';
+                    if (data.client !== null) {
+                        client = data.client.nom;
+                    }
+
+                    let tr = '<tr>\n' + '<td>' + data.numero_expertise + '</td>\n'
+                        + '<td>' + data.numero_document + '</td>\n' +
+                        '<td>' + data.dossier_mbeyan + '</td>\n' +
+                        '<td>' + data.quartier.libelle + '</td>\n' +
+                        '<td>' + data.cercle.libelle + '</td>\n' +
+                        '<td>' + data.region.libelle + '</td>\n' +
+                        '<td>' + data.prix_derniere_evaluation + '</td>\n' +
+                        '<td>' + client + '</td>\n' +
+                        '<td>' + data.koh_utilisateur.nom + '</td>\n' +
+                        '<td>' + data.proprio + '</td>\n' +
+                        '<td>' + data.type_aquisition.libelle + '</td>\n' +
+                        '<td>' + data.type_document + '</td>\n' +
+                        '<td>' + data.type_bien.libelle + '</td>\n' +
+                        '<td>' + data.usage_bien.libelle + '</td>\n' +
+                        '<td>' + data.superficie + '</td>\n' +
+                        '<td>' + data.latitude + '</td>\n' +
+                        '<td>' + data.longitude + '</td>\n' +
+                        '<td>' + getFormattedDate(new Date(data.last_evaluation_date.date)) + '</td>\n' +
+                        '<td>' + getFormattedDate(new Date(data.next_evaluation_date.date)) + '</td>\n' +
+                        '<td>' + date_entree + '</td>\n' +
+                        '<td>' + date_sortie_immobilisation + '</td>\n' +
+                        '<td>' + date_fin_dation + '</td>\n' +
+                        '<td>' + getFormattedDate(new Date(data.createdAt.date)) + '</td>\n' +
+                        '<td>' + data.createdBy + '</td>\n</tr>';
+                    table.append(tr);
+                }
+            }
+            $('#tableExport').table2excel({
+                filename: "liste-de-bien-" + new Date().getDate() + "-" + new Date().getMonth() + "-" + new Date().getFullYear() + "_" + new Date().getMilliseconds() + ".xls"
+            });
+        });
+
+        window.setTimeout(function () {
+            changementEtatAlert('all', false);
+        }, 5000);
+    </script>
+{% endblock %}

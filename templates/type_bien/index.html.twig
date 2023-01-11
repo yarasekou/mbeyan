@@ -1,0 +1,76 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Les types de bien{% endblock %}
+
+{% block body %}
+
+    <h5 class="font-weight-bold text-uppercase">Les types de bien de koh archivage</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        {% if type_biens is not empty %}
+            <table class="table text-center table-bordered font-weight-bold text-uppercase table-responsive-sm table-hover table-striped">
+                <thead>
+                <tr class="bg-dark text-white">
+                    <th>Libelle</th>
+                    <th>actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for type_bien in type_biens %}
+                    <tr>
+                        <td>{{ type_bien.name }}</td>
+                        <td>
+                            <div class="btn-group">
+                                {% if app.user.isAdmin %}
+                                    <a class="btn btn-sm btn-warning"
+                                       href="{{ path('type_bien_edit', {'id': type_bien.id}) }}"><i
+                                                class="fa fa-edit"></i></a>
+                                    <form style="display: inline-block" method="post"
+                                          action="{{ path('type_bien_delete', {'id': type_bien.id}) }}"
+                                          onsubmit="return confirm('La suppression du type supprime aussi toute exprtise associé. Êtes-vous sûr(e) ?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ type_bien.id) }}">
+                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-sm btn-dark">AUCUNE ACTION</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-danger text-center font-weight-bolder text-uppercase">AUCUN ENREGISTREMENT</div>
+        {% endif %}
+    </div>
+
+    {% if app.user.isAdmin %}
+        <a class="btn btn-primary mt-3 mb-3 font-weight-bold text-uppercase" href="{{ path('type_bien_new') }}">NOUVEAU
+            ENREGISTREMENT</a>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}
+

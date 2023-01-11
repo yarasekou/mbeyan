@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title '404 page not found' %}
+
+{% block body %}
+    <div style="margin-bottom: 100px" class="container mb-5">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="font-weight-bolder text-uppercase text-center text-danger">ERROR 404 Non trouvé</h3>
+                <hr>
+                <img src="{{ asset('images/errors/error.jpg') }}" alt="error images" width="100%" height="400px">
+                <p class="text-center text-danger font-weight-bolder mt-3">La page ou la ressource que vous démandez est
+                    introuvable</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

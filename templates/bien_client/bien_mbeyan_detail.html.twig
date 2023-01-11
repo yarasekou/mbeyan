@@ -1,0 +1,746 @@
+{% extends 'base_koh_utilisateur.html.twig' %}
+
+{% block title %} Detail bien {% endblock %}
+
+{% block stylesheets %}
+    <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&callback=googleMapLoader&libraries=&v=weekly"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-gradient-dark">
+                <h5 class="font-weight-bold text-uppercase text-white">Detail bien
+                    {{ bien.numeroDocument }} {% if bien.lastExpertise.createdBy != null %}
+                        expertisé
+                        par  {{ bien.lastExpertise.createdBy.firstName }} {{ bien.lastExpertise.createdBy.lastName }}
+                    {% endif %}</h5>
+            </div>
+            <div class="card-body font-weight-bold">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {% for message in app.flashes('danger') %}
+                    <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                <div id="map" class="mb-5" style="height: 500px; width: 100%"></div>
+                <hr>
+                <h5 class="font-weight-bold text-uppercase mt-3 mb-3">INFORMATION DU BIEN</h5>
+                <hr>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush text-uppercase">
+                            <li class="list-group-item mb-1">DOCUMENT :
+                                {{ bien.numeroDocument }}</li>
+                            <li class="list-group-item mb-1">Quartier :
+                                {{ bien.quartier.name }}</li>
+
+                            <li class="list-group-item mb-1">Type acquisition :
+                                <span class="badge badge-info font-weight-bold">{{ bien.lastExpertise.typeAcquisition.name }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">DERNIERE EVALUATION
+                                :
+                                {{ bien.lastExpertise.dateEvaluation | date('d-m-Y') }}</li>
+                            <li class="list-group-item mb-1">PROCHAINE EVALUATION
+                                :
+                                {{ bien.lastExpertise.dateNextEvaluation | date('d-m-Y') }}</li>
+                            {% if bien.lastExpertise.dateEntree != null %}
+                                <li class="list-group-item mb-1">DATE ENTREE :
+                                    {{ bien.lastExpertise.dateEntree| date('d-m-Y') }}</li>
+                            {% endif %}
+
+                            {% if bien.lastExpertise.dateFinDation != null %}
+                                <li class="list-group-item mb-1">FIN DATION :
+                                    {{ bien.lastExpertise.dateFinDation| date('d-m-Y') }}</li>
+                            {% endif %}
+                            <li class="list-group-item mb-1">NUMERO NINACAD :
+                                {% if bien.ninacad != null and bien.ninacad != '' %}
+                                    {{ bien.ninacad }}
+                                {% else %}
+                                    <span class="text-danger">NON DEFINI</span>
+                                {% endif %}
+                            </li>
+
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush text-uppercase">
+                            <li class="list-group-item mb-1">Géolocalisation : <span
+                                        id="adresseValue">{{ bien.lastExpertise.latitude }},{{ bien.lastExpertise.longitude }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">Superficie :
+                                {{ bien.lastExpertise.superficie }}
+                                m²
+                            </li>
+                            {% if bien.isForStructure %}
+                                <li class="list-group-item mb-1">Bien pour :
+                                    <span class="badge badge-danger font-weight-bold">{{ bien.kohUtilisateur.structure.name }}</span>
+                                </li>
+                                <li class="list-group-item mb-1">
+                                    CLIENT
+                                    {{ bien.kohUtilisateur.structure.name }} :
+                                    {{ bien.lastExpertise.clientStructure.name }}</li>
+                            {% else %}
+                                <li class="list-group-item mb-1">BIEN POUR
+                                    :
+                                    <span class="badge badge-info font-weight-bold">{{ bien.kohUtilisateur.firstName }}
+                                        {{ bien.kohUtilisateur.lastName }}</span></li>
+                            {% endif %}
+                            <li class="list-group-item mb-1">PRIX
+                                :
+                                <span class="badge badge-warning font-weight-bold">{{ bien.lastExpertise.lastEvaluationPrice | number_format(2, '.', ',') }}
+                                FCFA</span>
+                            </li>
+                            {% if bien.lastExpertise.dateSortieImmobilisation != null %}
+                                <li class="list-group-item">DATE SORTIE IMMOBILISATION
+                                    :
+                                    {{ bien.lastExpertise.dateSortieImmobilisation| date('d-m-Y') }}</li>
+                            {% endif %}
+                            <li class="list-group-item mb-1">NOM SUR LE DOCUMENT
+                                :
+                                {% if bien.lastExpertise.infoProprietaire != null and bien.lastExpertise.infoProprietaire != '' %}
+                                    {{ bien.lastExpertise.infoProprietaire }}
+                                {% else %}
+                                    <span class="text-success">LE NOM DU CLIENT</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+                <div class="row mt-3 mb-3">
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush text-uppercase">
+                            <li class="list-group-item mb-1">EXPERTISE NUMERO
+                                :
+                                <span class="badge badge-success font-weight-bold">{{ bien.lastExpertise.numeroExpertise|upper }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">TYPE USAGE BIEN
+                                :
+                                <span class="badge badge-primary font-weight-bold">{{ bien.lastExpertise.typeUsageBien.name|upper }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">TYPE BIEN : <span
+                                        class="badge badge-success font-weight-bold">{{ bien.lastExpertise.typeBien.name|upper }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-group list-group-flush text-uppercase">
+                            <li class="list-group-item mb-1">MBEYAN NUMERO
+                                :
+                                <span class="badge badge-warning font-weight-bold">{{ bien.lastExpertise.dossierMbeyan.numeroDossier|upper }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">TYPE DOCUMENT
+                                :
+                                <span class="badge badge-primary font-weight-bold">{{ bien.lastExpertise.typeDocumentPropriete.name|upper }}</span>
+                            </li>
+                            <li class="list-group-item mb-1">Enregistré
+                                le {{ bien.lastExpertise.createdAt|date('d/m/Y') }}
+                                à {{ bien.lastExpertise.createdAt|date('H:m:s') }}</li>
+                        </ul>
+                    </div>
+                </div>
+                {% if (bien.lastExpertise.remarque != null and bien.lastExpertise.remarque != '') or (bien.lastExpertise.memo != null and bien.lastExpertise.memo != '') or (bien.lastExpertise.other != null and bien.lastExpertise.other != '') %}
+                    <hr>
+                {% endif %}
+                <div class="row">
+                    {% if bien.lastExpertise.memo != '' %}
+                        <div class="col-md-4 border-dark p-3">
+                            <h6 class="font-weight-bold text-primary text-uppercase"><u>MEMO
+                                    {% if bien.lastExpertise.createdBy != null %}
+                                        PAR {{ bien.lastExpertise.createdBy.firstName }} {{ bien.lastExpertise.createdBy.lastName }}
+                                    {% endif %}</u>
+                            </h6>
+                            <p>{{ bien.lastExpertise.memo }}</p>
+                        </div>
+                    {% endif %}
+                    {% if bien.lastExpertise.remarque != '' %}
+                        <div class="col-md-4 border-dark p-3">
+                            <h6 class="font-weight-bold text-primary text-uppercase"><u>REMARQUE
+                                    {% if bien.lastExpertise.createdBy != null %}
+                                        PAR {{ bien.lastExpertise.createdBy.firstName }} {{ bien.lastExpertise.createdBy.lastName }}
+                                    {% endif %}
+                                </u></h6>
+                            <p>{{ bien.lastExpertise.remarque }}</p>
+                        </div>
+                    {% endif %}
+                    {% if bien.lastExpertise.other != '' %}
+                        <div class="col-md-4 border-dark p-3">
+                            <h6 class="font-weight-bold text-primary text-uppercase"><u>AUTRE
+                                    {% if bien.lastExpertise.createdBy != null %}
+                                        PAR {{ bien.lastExpertise.createdBy.firstName }} {{ bien.lastExpertise.createdBy.lastName }}
+                                    {% endif %}
+                                </u></h6>
+                            <p>{{ bien.lastExpertise.other }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if bien.lastExpertise.documentExpertises.count != 0 or
+                    bien.lastExpertise.documentImages.count != 0 or bien.lastExpertise.documentPdfs.count != 0
+                    or bien.lastExpertise.otherDocuments.count != 0 %}
+                    <hr>
+                {% endif %}
+                {% if bien.lastExpertise.documentImages.count != 0 %}
+                    <h6 class="text-uppercase font-weight-bold mt-3">LES PHOTOS DU BIEN</h6>
+                    <div class="row">
+                        {% for img in bien.lastExpertise.documentImages %}
+                            {% if img.name ends with '.jpg' or img.name ends with '.jpeg' or img.name ends with '.png' %}
+                                <div class="col-md-3 card">
+                                    <div class="card-body">
+                                        <a href="#" onclick="showModal('/biens/documents/images/{{ img.name }}')">
+                                            <img id="imageresource" src="/biens/documents/images/{{ img.name }}"
+                                                 width="100%"
+                                                 height="300px;"
+                                                 alt="image du bien">
+                                        </a>
+                                    </div>
+                                    <div class="card-footer">
+                                        <form method="post" class="text-center"
+                                              style="alignment: center"
+                                              action="{{ path('bien_client_delete_document_image', {'id': img.id}) }}"
+                                              onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                                            <input type="hidden" name="_method" value="DELETE">
+                                            <input type="hidden" name="_token"
+                                                   value="{{ csrf_token('delete' ~ img.id) }}">
+                                            <p class="text-center">
+                                                <button type="submit"
+                                                        class="btn btn-danger btn-sm">
+                                                    <i
+                                                            class="fa fa-trash-alt"></i>
+                                                </button>
+                                            </p>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <hr>
+                {% if bien.lastExpertise.documentExpertises.count != 0 %}
+                    <h3 class="text-uppercase font-weight-bold h5 mt-3 mb-3">Les documents expertises</h3>
+                    {% for doc in bien.lastExpertise.documentExpertises %}
+                        <div class="row">
+                            <a target="_blank" class="text-uppercase btn btn-success ml-2 mb-3"
+                               href="/biens/documents/expertises/{{ doc.name }}" {% if not app.user.isKohUser and not app.user.isAdmin %} download="" {% endif %}>
+                                <span>{{ doc.name }}</span>
+                            </a>
+                            <div class="col-md-6">
+                                <form method="post" class="text-center"
+                                      style="alignment: center"
+                                      action="{{ path('bien_client_delete_document_expertise', {'id': doc.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete' ~ doc.id) }}">
+                                    <p class="text-left">
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash-alt"></i>
+                                        </button>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% if bien.lastExpertise.documentPdfs.count != 0 %}
+                    <h3 class="text-uppercase font-weight-bold h5 mt-3 mb-3">Les documents de propriétés</h3>
+                    {% for doc in bien.lastExpertise.documentPdfs %}
+                        <div class="row">
+                            <a target="_blank" class="text-uppercase btn btn-info ml-2 mb-3"
+                               href="/biens/documents/pdf/{{ doc.name }}" {% if not app.user.isKohUser and not app.user.isAdmin %} download="" {% endif %}>
+                                <span>{{ doc.name }}</span>
+                            </a>
+                            <div class="col-md-6">
+                                <form method="post" class="text-center"
+                                      style="alignment: center"
+                                      action="{{ path('bien_client_delete_document_pdf', {'id': doc.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete' ~ doc.id) }}">
+                                    <p class="text-left">
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash-alt"></i>
+                                        </button>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% if bien.lastExpertise.otherDocuments.count != 0 %}
+                    <h3 class="text-uppercase font-weight-bold h5 mt-3 mb-3">Les autres documents</h3>
+                    {% for doc in bien.lastExpertise.otherDocuments %}
+                        <div class="row">
+                            <a target="_blank" class="text-uppercase btn btn-dark ml-2 mb-3"
+                               href="/biens/documents/files/{{ doc.name }}" {% if not app.user.isKohUser and not app.user.isAdmin %} download="" {% endif %}>
+                                <span>{{ doc.name }}</span>
+                            </a>
+                            <div class="col-md-6">
+                                <form method="post" class="text-center"
+                                      style="alignment: center"
+                                      action="{{ path('bien_client_delete_other_document', {'id': doc.id}) }}"
+                                      onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                                    <input type="hidden" name="_method" value="DELETE">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete' ~ doc.id) }}">
+                                    <p class="text-left">
+                                        <button type="submit"
+                                                class="btn btn-danger btn-sm">
+                                            <i class="fa fa-trash-alt"></i>
+                                        </button>
+                                    </p>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <div class="mt-3 mb-3">
+                    <div class="btn-group align-content-center">
+                        <button id="btnAdresseValue" onclick="copyAdresse()" type="button"
+                                class="btn btn-success font-weight-bold text-uppercase mt-3"
+                                value="{{ bien.lastExpertise.latitude }},{{ bien.lastExpertise.longitude }}"><i
+                                    class="fa fa-copy"></i>&nbsp;Copier Itinéraire
+                        </button>
+                        <a
+                                class="btn btn-warning font-weight-bold text-uppercase mt-3"
+                                href="{{ path('bien_client_edit', {'id': bien.lastExpertise.id}) }}"><i
+                                    class="fa fa-edit"></i>&nbsp;Modifier
+                            expertise</a>
+
+                        <form method="post" class="text-center" style="display: inline-block"
+                              action="{{ path('super_admin.delete_bienclient', {'id': bien.lastExpertise.id}) }}"
+                              onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_token"
+                                   value="{{ csrf_token('delete' ~ bien.lastExpertise.id) }}">
+                            <button class="btn btn-danger font-weight-bold text-uppercase mt-3"><i
+                                        class="fa fa-trash-alt"></i>&nbsp;Supprimer expertise
+                            </button>
+                        </form>
+                        <button data-toggle="modal"
+                                data-target="#exampleModalCenter"
+                                class="btn btn-primary font-weight-bold text-uppercase mt-3"><i
+                                    class="fa fa-file-alt"></i>&nbsp;Ajouter fichier
+                        </button>
+                        {% if bien.lastExpertise.memoBiens.count != 0 or bien.lastExpertise.remarqueBiens.count != 0 or bien.lastExpertise.otherInfoBiens.count != 0 %}
+                            <button class="btn btn-dark font-weight-bold mt-3" data-toggle="modal"
+                                    data-target="#modalInfos">VOIR PLUS
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden"
+           value="{{ bien.lastExpertise.latitude }},{{ bien.lastExpertise.longitude }}"
+           id="inputAdresse">
+    <input type="hidden" id="hiddenUser" class="form-control" value="{{ bien.expertises.last.id }}">
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-dark text-white">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLongTitle">AJOUTER DES
+                        FICHIERS</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form class="col-md-12" method="post" enctype="multipart/form-data"
+                          action="{{ path('bien_client_new_add_files', {'id': bien.lastExpertise.id}) }}"
+                          onsubmit="return confirm('Êtes-vous sûr(e) ?')">
+                        <div class="form-row align-items-start text-uppercase font-weight-bold">
+                            <div class="col-md-6">
+                                <div id="form_image">
+                                    <div class="form-row align-items-start">
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <label for=""><span class="text-danger font-weight-bold">(1)</span>
+                                                    Photo</label>
+                                                <input type="file" class="form-control" name="document_image">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group mt-4">
+                                                <button type="button" id="addImage" class="btn btn-success"><i
+                                                            class="fa fa-plus"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="form_propriete_pdf">
+                                    <div class="form-row align-items-start">
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <label for=""><span class="text-danger font-weight-bold">(2)</span>
+                                                    Document proprieté
+                                                    pdf</label>
+                                                <input type="file" class="form-control" name="document_propriete_pdf">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group mt-4">
+                                                <button type="button" id="addProprietePdf" class="btn btn-success"><i
+                                                            class="fa fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="form-row align-items-start text-uppercase font-weight-bold">
+                            <div class="col-md-6">
+                                <div id="form_expertise_pdf">
+                                    <div class="form-row align-items-start">
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <label for=""><span class="text-danger font-weight-bold">(3)</span>
+                                                    Document expertise
+                                                    pdf</label>
+                                                <input type="file" class="form-control" name="document_expertise_pdf">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1 mt-4">
+                                            <div class="form-group">
+                                                <button type="button" id="addExpertisePdf" class="btn btn-success"><i
+                                                            class="fa fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="form_other">
+                                    <div class="form-row align-items-start">
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                <label for=""><span class="text-danger font-weight-bold">(4)</span>
+                                                    Autre document</label>
+                                                <input type="file" class="form-control" name="document_other">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group mt-4">
+                                                <button type="button" id="addOtherDoc" class="btn btn-success"><i
+                                                            class="fa fa-plus"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <button class="btn btn-dark float-right mt-3" type="submit">ENREGISTRER</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="imagemodal" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-dark text-white">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLongTitle">Image du
+                        bien</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img src="" id="imagepreview" style="width: 100%; height: 100%;" alt="image bien">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalInfos" tabindex="-1" role="dialog"
+         aria-labelledby="exampleModalCenterTitle"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-gradient-dark text-white">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLongTitle">Remarques</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% if bien.lastExpertise.memoBiens.count != 0 or bien.lastExpertise.remarqueBiens.count != 0 or bien.lastExpertise.otherInfoBiens.count != 0 %}
+                        <div class="row">
+                            {% if  bien.lastExpertise.memoBiens.count != 0 %}
+                                {% for memo in bien.lastExpertise.memoBiens %}
+                                    <div class="col-md-4 border-dark p-3">
+                                        <p class="text-uppercase font-weight-bold text-primary">Mémo
+                                            par {{ memo.createdBy.firstname|upper }} {{ memo.createdBy.lastname|upper }}</p>
+                                        <p>{{ memo.content }}</p>
+                                        <p class="text-center badge badge-danger text-uppercase align-bottom">Ajouté
+                                            le {{ memo.createdAt|date('d-m-Y') }}</p>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if bien.lastExpertise.remarqueBiens.count != 0 %}
+                                {% for remarque in bien.lastExpertise.remarqueBiens %}
+                                    <div class="col-md-4 border-dark p-3">
+                                        <p class="text-uppercase font-weight-bold text-primary">Rémarque
+                                            par {{ remarque.createdBy.firstname|upper }} {{ remarque.createdBy.lastname|upper }}</p>
+                                        <p>{{ remarque.content }}</p>
+                                        <p class="text-center badge badge-danger text-uppercase">Ajouté
+                                            le {{ remarque.createdAt|date('d-m-Y') }}</p>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if bien.lastExpertise.otherInfoBiens.count != 0 %}
+                                {% for other in bien.lastExpertise.otherInfoBiens %}
+                                    <div class="col-md-4 border-dark p-3">
+                                        <p class="text-uppercase font-weight-bold text-primary">Autre
+                                            par {{ other.createdBy.firstname|upper }} {{ other.createdBy.lastname|upper }}</p>
+                                        <p>{{ other.content }}</p>
+                                        <p class="text-center badge badge-danger text-uppercase">Ajouté
+                                            le {{ other.createdAt|date('d-m-Y') }}</p>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function showModal(s) {
+            $('#imagepreview').attr('src', s);
+            $('#imagemodal').modal('show');
+        }
+    </script>
+    <script>
+        function copyAdresse() {
+            /* Get the text field */
+            let copyText = document.getElementById("adresseValue").innerText;
+            const el = document.createElement('textarea');
+            el.value = copyText;
+            el.setAttribute('readonly', '');
+            el.style.position = 'absolute';
+            el.style.left = '-9999px';
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert(`${copyText} COPIE AVEC SUCCES`);
+        }
+
+        let numero = $('#hiddenUser').val();
+
+        function googleMapLoader() {
+            $.ajax({
+                url: '/koh-archivage/bien-client/' + numero + '/get',
+                dataType: 'json',
+                type: 'get',
+                success: function (data) {
+                    "use strict";
+                    initMap(data, false);
+                }
+            });
+        }
+
+        function transformDate(dateInit) {
+            let deadLine = new Date(dateInit).getTime();
+            let now = new Date().getTime();
+            let t = deadLine - now;
+            let days = Math.floor(t / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((t % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let min = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+            let sec = Math.floor((t % (1000 * 60)) / 1000);
+            return days + ' jour ' + hours + ' h ' + min + ' min ' + sec + ' s';
+        }
+
+        function initMap(d, isSearch) {
+            let myLatLng = {
+                lat: +d.latitude,
+                lng: +d.longitude
+            };
+
+            let mapOptions = {
+                zoom: 18,
+                center: myLatLng,
+                mapTypeId: 'hybrid',
+                labels: true
+            };
+
+            let map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 20,
+                center: myLatLng,
+                mapTypeId: 'hybrid',
+                labels: true
+            });
+            myLatLng = {
+                lat: +d.latitude,
+                lng: +d.longitude
+            };
+            const image = {
+                url: d.logo,
+                scaledSize: new google.maps.Size(75, 75),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(0, 0),
+                labelOrigin: new google.maps.Point(35, 90)
+            };
+
+            let next_date_estimation = transformDate(d.next_evaluation_date.date);
+            let date_entree = '';
+            let date_sortie_immobilisation = '';
+            let date_fin_dation = '';
+            if (d.date_entree != null) {
+                date_entree = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                    transformDate(d.date_entree.date)
+                ) + "</span></strong></li>";
+            }
+            if (d.date_sortie_immobilisation != null) {
+                date_sortie_immobilisation = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                    transformDate(d.date_sortie_immobilisation.date)
+                ) + "</span></strong></li>";
+            }
+            if (d.date_fin_dation != null) {
+                date_fin_dation = "<li class=\"mt-2\"><strong>Date fin dation : <span class=\"text-danger font-weight-bold\">" + (
+                    transformDate(d.date_fin_dation.date)
+                ) + "</span></strong></li>";
+            }
+            let title = d.type_document.toUpperCase() + ' ' + d.numero_document.toUpperCase() + ' /' + d.quartier.libelle.toUpperCase();
+            let color = '';
+            if (d.type_aquisition.for_structure === true) {
+                color = 'red';
+            } else
+                color = 'black';
+
+
+            let marker = new google.maps.Marker({
+                position: myLatLng,
+                map: map,
+                label: {
+                    text: title,
+                    fontWeight: 'bold',
+                    color: color,
+                    fontSize: '10px',
+                    content: title
+                },
+                icon: image
+            });
+
+            let head = '';
+
+            if (d.structure !== null) {
+                head = 'Bien pour ' + d.structure.nom;
+            } else {
+                head = 'BIEN POUR ' + d.koh_utilisateur.nom + ' ' + d.koh_utilisateur.prenom;
+            }
+
+            const contentString = "<div id=\"content\">\n" + "        <div id=\"siteNotice\"></div>\n" + "        <h5 id=\"firstHeading\" class=\"firstHeading text-uppercase\">" + head + "</h5>\n" + "        <div id=\"bodyContent\">\n" + "<ul class=\"list-group text-uppercase\">\n" + "        <li class=\"mt-2\"><strong>Latitude : " + d.latitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Longitude " + d.longitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Surface : " + d.superficie + " m² </strong></li>\n" + "        <li class=\"mt-2\"><strong>document : " + d.numero_document + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier expertise : " + d.dossier_koh + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier mbeyan : " + d.dossier_mbeyan + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Type acquisition : " + d.type_aquisition.libelle + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Date prochiane evaluation : <span class=\"text-danger font-weight-bold\" id='days'>" + next_date_estimation + " </strong></li>\n" + "        " + date_entree + " \n" + "        " + date_sortie_immobilisation + " \n" + "        " + date_fin_dation + " \n" + "         <p class=\"text-center mt-3\"><a href='" + d.lien + "'>cliquer sur ce lien pour plus de detail</a></p>\n" + "    </ul>\n" + "</div>";
+
+            let content = '<ul class="list-group">\n' + '        <li class="list-group-item"> DOCUMENT : ' + d.numero_document.toUpperCase() + '</li>\n' + '        <li class="list-group-item">EXPERTISE : ' + d.dossier_koh.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE ACQUISITION : ' + d.type_aquisition.libelle.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE DOCUMENT : ' + d.type_document.toUpperCase() + '</li>\n' + '    </ul>';
+
+            if (isSearch) {
+                $('#list-biens').append("<li id=\"list-item" + cpt + "\" class=\"list-group-item\"><label for=\"check" + cpt + "\"></label><input value=\"" + d.numero_document + " \" id=\"check" + cpt + "\" type=\"checkbox\"\n" + "                                                                                   class=\"form-check-inline\">" + d.numero_document.toUpperCase() + "\n" + "<br><span class=\"ml-3 small\">" + d.quartier.libelle.toUpperCase() + "/" + d.type_document.toUpperCase() + "</span> " + "<br><span class=\"ml-3 small\">PRIX : <strong>" + String(d.prix_derniere_evaluation).replace(/(.)(?=(\d{3})+$)/g, '$1,') + "</strong> FCFA</span> " + "                    </li>");
+            }
+
+            const infowindow = new google.maps.InfoWindow({content: contentString});
+
+            const infoW = new google.maps.InfoWindow({content: content});
+
+
+            google.maps.event.addListener(infoW, 'closeclick', function () {
+                infoW.open(map, marker);
+            });
+
+            google.maps.event.addListener(infowindow, 'closeclick', function () {
+                infoW.open(map, marker);
+            });
+        }
+
+        $(document).ready(function () {
+            let i = 1;
+            let j = 1;
+            let k = 1;
+            let l = 1;
+            $('#addImage').on('click', function () {
+                i++;
+                $('#form_image').append('<div id=\'form-row-image' + (
+                    i) + '\' class="form-row align-items-end">\n' + '        <div class="col-md-10">\n' + '            <div class="form-group">\n' + '                <label for="">Photo ' + (
+                    i) + '</label>\n' + '                <input type="file" class="form-control" name="document_image' + (
+                    i) + '">\n' + '            </div>\n' + '        </div>\n' + '        <div class="col-md-1">\n' + '            <div class="form-group">\n' + '                <button type="button" id=\'' + (
+                    i) + '\' class="btn btn-danger removeImage"><i class="fa fa-trash-alt"></i></button>\n' + '            </div>\n' + '        </div>\n' + '    </div>');
+            });
+
+            $(document).on('click', '.removeImage', function () {
+                let btn = $(this).attr('id');
+                document.getElementById('form-row-image' + btn).innerHTML = "";
+            });
+
+            $('#addProprietePdf').on('click', function () {
+                j++;
+                $('#form_propriete_pdf').append('<div class="form-row align-items-end" id="form-row-pdf' + (
+                    j) + '">\n' + '        <div class="col-md-10">\n' + '            <div class="form-group">\n' + '                <label for="">Document proprieté pdf ' + (
+                    j) + '</label>\n' + '                <input type="file" name="document_propriete_pdf' + (
+                    j) + '" class="form-control">\n' + '            </div>\n' + '        </div>\n' + '        <div class="col-md-1">\n' + '            <div class="form-group">\n' + '                <button class="btn btn-danger removeProprietePdf" id="' + (
+                    j) + '" ><i class="fa fa-trash-alt"></i></button>\n' + '            </div>\n' + '        </div>\n' + '    </div>');
+            });
+
+            $(document).on('click', '.removeProprietePdf', function () {
+                let btn = $(this).attr('id');
+                document.getElementById('form-row-pdf' + btn).innerHTML = "";
+            });
+
+            $('#addExpertisePdf').on('click', function () {
+                k++;
+                $('#form_expertise_pdf').append('<div class="form-row align-items-end" id=\"form-row-expert' + (
+                    k) + '\">\n' + '        <div class="col-md-10">\n' + '            <div class="form-group">\n' + '                <label for="">Document expertise pdf ' + (
+                    k) + '</label>\n' + '                <input type="file" class="form-control" name="document_expertise_pdf' + (
+                    k) + '">\n' + '            </div>\n' + '        </div>\n' + '        <div class="col-md-1">\n' + '            <div class="form-group">\n' + '                <button type="button" id="' + (
+                    k) + '" class="btn btn-danger removeExpertisePdf"><i class="fa fa-trash-alt"></i></button>\n' + '            </div>\n' + '        </div>\n' + '    </div>');
+            });
+
+            $(document).on('click', '.removeExpertisePdf', function () {
+                let btn = $(this).attr('id');
+                document.getElementById('form-row-expert' + btn).innerHTML = "";
+            });
+
+            $('#addOtherDoc').on('click', function () {
+                l++;
+                $('#form_other').append('<div class="form-row align-items-end" id=\"form-row-other' + (
+                    l) + '\">\n' + '        <div class="col-md-10">\n' + '            <div class="form-group">\n' + '                <label for="">Autre document ' + (
+                    l) + '</label>\n' + '                <input type="file" class="form-control" name="document_other' + l + '">\n' + '            </div>\n' + '        </div>\n' + '        <div class="col-md-1">\n' + '            <div class="form-group">\n' + '                <button type="button" id="' + (
+                    l) + '" class="btn btn-danger removeOtherDoc"><i class="fa fa-trash-alt"></i></button>\n' + '            </div>\n' + '        </div>\n' + '    </div>');
+            });
+
+            $(document).on('click', '.removeOtherDoc', function () {
+                let btn = $(this).attr('id');
+                document.getElementById('form-row-other' + btn).innerHTML = "";
+            });
+        });
+    </script>
+{% endblock %}

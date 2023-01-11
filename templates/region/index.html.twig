@@ -1,0 +1,94 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}la liste des regions {% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bold text-uppercase">
+        &nbsp;La liste des régions</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        {% if regions is not empty %}
+            <table class="table text-center table-bordered  table-hover font-weight-bold text-uppercase table-responsive-sm table-striped mt-3 mb-3">
+                <thead>
+                <tr class="bg-dark text-white">
+                    <th>Libelle</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                    <th>actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for region in regions %}
+                    <tr>
+                        <td>{{ region.name }}</td>
+                        <td>
+                            {% if region.latitude == null %}
+                                <span class="badge badge-danger">non défini</span>
+                            {% else %}
+                                <span class="badge badge-success">{{ region.latitude }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if region.longitude == null %}
+                                <span class="badge badge-danger">non défini</span>
+                            {% else %}
+                                <span class="badge badge-success">{{ region.longitude }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                {% if app.user.isAdmin %}
+                                    <a class="btn btn-sm btn-warning" href="{{ path('region_edit', {'id': region.id}) }}">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <form style="display: inline-block" method="post"
+                                          action="{{ path('region_delete', {'id': region.id}) }}"
+                                          onsubmit="return confirm('Êtes-vous sûr(e) de supprimer ?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ region.id) }}">
+                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-dark btn-sm disabled">AUCUNE ACTION</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-uppercase">AUCUN ENREGISTREMENT</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                AUCUN ENREGISTREMENT
+            </div>
+        {% endif %}
+    </div>
+    {% if app.user.isAdmin %}
+        <a href="{{ path('region_new') }}" class="btn btn-primary mt-3 mb-5 font-weight-bold text-uppercase">Nouvelle région</a>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

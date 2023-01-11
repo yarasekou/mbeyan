@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}Welcome!
+        {% endblock %}
+    </title>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="shortcut icon" href="{{ asset('images/logo-mbeyan.jpeg') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/font/font.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/perfect-scrollbar.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/coreui.css') }}">
+    <link href="{{ asset('dashboard/css/select2.css') }}" rel="stylesheet"/>
+    <script src="{{ asset('dashboard/js/jquery.js') }}"></script>
+    <script src="{{ asset('dashboard/js/select2.js') }}"></script>
+
+
+    {% block stylesheets %}{% endblock %}
+
+</head>
+<body class="c-app">
+<div class="c-sidebar c-sidebar-nav-link-dark bg-dark c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand bg-light d-lg-down-none">
+        <img class="c-sidebar-brand-full" width="60" height="46" alt="Logo mbeyan"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+        <img class="c-sidebar-brand-minimized" width="46" height="46" alt="Logo mbeyan"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+    </div>
+
+    <ul class="c-sidebar-nav">
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('super_admin.home') }}">
+                <i class="fa fa-tachometer-alt c-sidebar-nav-icon "></i>TABLEAU DE BORD</a>
+        </li>
+        {% block flitre %}
+            <li class="c-sidebar-nav-item">
+                <hr>
+                <h6 class="font-weight-bold text-uppercase text-left ml-3">FILTRER LES BIENS</h6>
+                <form action="#">
+                    <div class="col-md-12" id="form-type">
+                        <label for="type_filter"></label>
+                        <select name="type" id="type_filter" class="form-control text-uppercase">
+                            <option value="" selected>-- Selectionner le filtre --</option>
+                            <option value="1">-- Filtrer par banque --</option>
+                            <option value="2">-- Filtrer par client --</option>
+                            <option value="3">-- Autre filtre --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-12 d-none" id="form-banque">
+                        <label for="banque"></label>
+                        <select name="banque" id="banque" class="form-control text-uppercase"></select>
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form-part">
+                        <label for="particulier"></label>
+                        <select name="particulier" id="particulier" class="form-control text-uppercase"></select>
+                    </div>
+                    <div class="col-md-12 d-none" id="form-secondFilter">
+                        <label for="secondFilter"></label>
+                        <select name="secondFilter" class="form-control text-uppercase" id="secondFilter">
+                            <option value="">-- Selectionner le filtre --</option>
+                            <option value="1">QUARTIER</option>
+                            <option value="2">DATE PROCHAINE EVALUATION</option>
+                            <option value="3">DATE FIN DATION</option>
+                            <option value="4">DATE SORTI IMMOBILISATION</option>
+                            <option value="5">TYPE DOCUMENT</option>
+                            <option value="6">TYPE ACQUISITION</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_quartier">
+                        <label for="quartier"></label>
+                        <input type="text" class="form-control" required id="quartier" placeholder="SAISIR LE QUARTIER">
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_date_prochaine_evaluation">
+                        <label for="date_prochaine_evaluation"></label>
+                        <input type="date" class="form-control" required id="date_prochaine_evaluation">
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_date_fin_dation">
+                        <label for="date_fin_dation"></label>
+                        <input type="date" class="form-control" required id="date_fin_dation">
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_date_sortie_immobilisation">
+                        <label for="date_sortie_immobilisation"></label>
+                        <input type="date" class="form-control" required id="date_sortie_immobilisation">
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_type_document">
+                        <label for="type_document"></label>
+                        <select class="form-control text-uppercase" name="type_document" id="type_document"></select>
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form_type_acquisition">
+                        <label for="type_acquisition"></label>
+                        <select class="form-control text-uppercase" name="type_acquisition"
+                                id="type_acquisition"></select>
+                    </div>
+
+                    <div class="col-md-12 d-none" id="form-numero">
+                        <label for="numero_document"></label>
+                        <input type="text" placeholder="RECHERCHER PAR NUMERO" class="form-control" required
+                               id="numero_document">
+                    </div>
+
+                    <p class="text-center">
+                        <button class="btn btn-success mt-3" type="button" id="COCHER">TOUT COCHER/DECOCHER</button>
+                    </p>
+                    <ul class="list-group mt-3 mr-3 ml-3" id="list-biens"></ul>
+                </form>
+
+                <p class="text-center font-weight-bold mt-3 text-uppercase d-none" id="total_montant"></p>
+
+                <div class="btn-group-sm text-center mt-3">
+                    <button class="btn btn-success btn-sm d-none" type="button" id="btn-total">TOTALE</button>
+                    <button class="btn btn-success btn-sm d-none" type="button" id="btn-export">
+                        <i class="fa fa-file-excel-o"></i>EXPORTER
+                    </button>
+                </div>
+
+                <p class="text-center mt-3">
+                    <button class="btn btn-warning d-none" id="btn-annuler">ANNULER FILTRE</button>
+                </p>
+            </li>{% endblock %}
+    </ul>
+    <table class="table table-striped text-center d-none" id="bien_table">
+        <thead>
+        <tr class="text-uppercase">
+            <td>Id</td>
+            <td>Numero document</td>
+            <td>Numero expertise</td>
+            <td>Numero mbeyan</td>
+            <td>Latitude</td>
+            <td>Longitude</td>
+            <td>Type document</td>
+            <td>Type acquisition</td>
+            <td>Quartier</td>
+            <td>Prix évaluation</td>
+            <td>Superficie</td>
+            <td>Date prochaine évaluation</td>
+            <td>Montant acquisition</td>
+            <td>Frais acquisition</td>
+            <td>Date entrée</td>
+            <td>Date sortie immobilisation</td>
+            <td>Date fin dation</td>
+            <td>Client</td>
+            <td>Nom mentionné sur le document</td>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<div class="c-wrapper c-fixed-components">
+    <header class="c-header c-header-light c-header-fixed c-header-with-subheader">
+        <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+            <i class="fa fa-align-justify text-primary c-icon c-icon-lg"></i>
+        </button>
+        <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+            <i class="fa fa-align-justify text-primary c-icon c-icon-lg"></i>
+        </button>
+
+        <ul class="c-header-nav ml-auto mr-4">
+            <li class="c-header-nav-item dropdown">
+                <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">
+                    <span class="font-weight-bold text-uppercase mr-2">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+                    <div class="c-avatar">
+                        <img class="c-avatar-img" {% if app.user.imageProfile != null and app.user.imageProfile != '' %} src="/images/users/{{ app.user.imageProfile }}" {% else %} src="{{ asset('images/user.jpg') }}" {% endif %}
+                             alt="image utilisateur">
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right pt-0">
+                    <div class="dropdown-header bg-light py-2">
+                        <strong>MON COMPTE</strong>
+                    </div>
+                    <a class="dropdown-item" href="{{ path('super_admin.home') }}">
+                        <i class="fa fa-home text-dark c-icon"></i>
+                        &nbsp;DASHBOARD BIEN</a>
+                    <a class="dropdown-item" href="{{ path('app_logout') }}">
+                        <i class="fa fa-sign-out-alt text-dark c-icon"></i>
+                        &nbsp;DECONNEXION</a>
+                </div>
+            </li>
+        </ul>
+
+        {% block breadcrump %}{% endblock %}
+    </header>
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid"> {% block body %}{% endblock %}
+            </div>
+        </main>
+        <footer class="bg-dark">
+            <div class="container">
+                <p class="text-center text-white font-weight-bolder text-uppercase"><br>KOH POLY
+                    EXPERTISE {{ "now"|date('Y') }} &copy;. Tous droits réservés</p>
+            </div>
+        </footer>
+    </div>
+</div>
+<script src="{{ asset('dashboard/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ asset('dashboard/js/popper.js') }}"></script>
+<script src="{{ asset('dashboard/js/coreui.js') }}"></script>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

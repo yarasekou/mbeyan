@@ -1,0 +1,27 @@
+{% extends 'base_structure.html.twig' %}
+
+{% block title 'Mbeyan: gestion des clients' %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-gradient-dark text-white">
+                <h5 class="font-weight-bold text-uppercase text-white">
+                    <i class="fa fa-user-plus"></i>&nbsp;Modifier Utilisateur de {{ app.user.structure.name }}
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for message in app.flashes('error') %}
+                    <div class="col-md-10 offset-md-1 alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {{ include('utilisateur_structure/_new_structure_utilisateur.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+{% endblock %}

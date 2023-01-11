@@ -1,0 +1,49 @@
+vich_uploader:
+  db_driver: orm
+  mappings:
+    user_image:
+      uri_prefix: /images/users
+      upload_destination: '%kernel.project_dir%/public/images/users'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+
+    structure_image:
+      uri_prefix: /images/structures
+      upload_destination: '%kernel.project_dir%/public/images/structures'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+
+    bien_icon:
+      uri_prefix: /images/bien/icons
+      upload_destination: '%kernel.project_dir%/public/images/bien/icons'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+
+    bien_document_expertise:
+      uri_prefix: /biens/documents/expertises
+      upload_destination: '%kernel.project_dir%/public/biens/documents/expertises'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true
+
+    bien_document_image:
+      uri_prefix: /biens/documents/images
+      upload_destination: '%kernel.project_dir%/public/biens/documents/images'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true
+
+    bien_document_pdf:
+      uri_prefix: /biens/documents/pdf
+      upload_destination: '%kernel.project_dir%/public/biens/documents/pdf'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true
+
+    other_document:
+      uri_prefix: /biens/documents/files
+      upload_destination: '%kernel.project_dir%/public/biens/documents/files'
+      namer: Vich\UploaderBundle\Naming\UniqidNamer
+      inject_on_load: false
+      delete_on_update: true
+      delete_on_remove: true

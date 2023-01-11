@@ -1,0 +1,126 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Profile utilisateur{% endblock %}
+{% block stylesheets %}
+    <style>
+        hr {
+            border: 2px solid #0a53be;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div class="container mt-3 mb-5">
+        <div class="col-md-12">
+            {% for message in app.flashes('success') %}
+                <div class="col-md-8 offset-md-2 alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            {% for message in app.flashes('danger') %}
+                <div class="col-md-8 offset-md-2 alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <div class="card card-accent-dark">
+                <div class="card-header">
+                    <h3 class="font-weight-bolder text-danger text-uppercase text-center">Information
+                        utilisateur</h3>
+                </div>
+                <div class="card-body text-uppercase">
+                    <div class="row">
+                        <div class="col-md-3 border-dark" style="border-radius: 20px;">
+                            {% if koh_utilisateur.imageProfile == null %}
+                                <img src="{{ asset('images/user.jpg') }}" class="c-avatar-img" alt="image profile">
+                            {% else %}
+                                <img src="/images/users/{{ koh_utilisateur.imageProfile }}" class="c-avatar-img"
+                                     alt="image profile">
+                            {% endif %}
+                            {% if app.user == koh_utilisateur %}
+                                <p class="text-center">
+                                    <button type="button" class="btn btn-sm btn-danger mt-3" data-toggle="modal"
+                                            data-target="#modalImage">MODIFIER
+                                    </button>
+                                </p>
+                            {% endif %}
+                            <hr>
+                            <h5 class="text-center font-weight-bolder text-uppercase">LES ROLES</h5>
+                            {% for role in koh_utilisateur.authorities %}
+                                <button class="btn btn-block btn-dark text-uppercase">{{ role.name }}</button>
+                            {% endfor %}
+                            <div class="mb-1"></div>
+                        </div>
+                        <div class="col-md-9 border-dark" style="border-radius: 20px;">
+                            <br>
+                            <h5 class="ml-5">Nom : {{ koh_utilisateur.firstName }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Prénom : {{ koh_utilisateur.lastName }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Username : {{ koh_utilisateur.username }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Email : {{ koh_utilisateur.firstName }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Téléphone : {{ koh_utilisateur.telephone }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Adresse : {{ koh_utilisateur.adresse }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Date de création : {{ koh_utilisateur.createdAt|date('d-m-Y') }}</h5>
+                            <hr>
+                            <h5 class="ml-5">Status compte {% if koh_utilisateur.isActived %}
+                                    <span class="badge badge-primary">ACTIF</span> {% else %} <span
+                                        class="badge badge-danger">NON ACTIF</span>
+                                {% endif %}</h5>
+                            <br>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('koh_utilisateur_index') }}" class="font-weight-bold text-uppercase mr-2 mb-5">Afficher
+                        la liste des utilisateurs</a>
+                    {% if app.user != koh_utilisateur %}
+                        {% if koh_utilisateur.authorities.contains('SUPER_ADMIN') %}
+                            {{ include('koh_utilisateur/_delete_form.html.twig') }}
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalImage" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLabel">CHANGER IMAGE
+                        PROFILE</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ path('koh_utilisateur_change_user_profile') }}" enctype="multipart/form-data"
+                      class="modal-body" method="post">
+                    <div class="form-group">
+                        <label for="image">Choisir une image</label>
+                        <input id="image" accept="image/gif, image/png, image/jpeg" type="file" class="form-control"
+                               name="profile_user" required alt="">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary float-right">CHANGER</button>
+                        <button type="reset" class="btn btn-danger float-right mr-1" data-dismiss="modal">ANNULER
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}
+

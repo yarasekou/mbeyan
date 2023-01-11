@@ -1,0 +1,132 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}La liste des administrateurs de l'application mbeyan{% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bolder text-uppercase">Les administrateurs de mbeyan</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive mt-3">
+        {% if koh_utilisateurs is not empty %}
+            <table class="table table-hover text-uppercase font-weight-bolder table-bordered table-striped text-center">
+                <thead>
+                <tr class="text-uppercase bg-dark text-white">
+                    <th>Email</th>
+                    <th>Nom</th>
+                    <th>Telephone</th>
+                    <th>Actif</th>
+                    <th>Admin</th>
+                    <th>Confirmé</th>
+                    <th>actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for koh_utilisateur in koh_utilisateurs %}
+                    <tr>
+                        <td>{{ koh_utilisateur.email }}</td>
+                        <td>{{ koh_utilisateur.lastName }} {{ koh_utilisateur.firstName }}</td>
+                        <td>{{ koh_utilisateur.telephone }}</td>
+                        <td>
+                            {% if koh_utilisateur.isActived %}
+                                <span class="badge badge-primary">OUI</span>
+                            {% else %}
+                                <span class="badge badge-dark">NON</span>
+                            {% endif %}
+                        <td>
+                            {% if koh_utilisateur.isAdmin %}
+                                <span class="badge badge-success">OUI</span>
+                            {% else %}
+                                <span class="badge badge-warning">NON</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if koh_utilisateur.isConfirmed %}
+                                <span class="badge badge-dark">OUI</span>
+                            {% else %}
+                                <span class="badge badge-danger">NON</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-success"
+                                   href="{{ path('koh_utilisateur_show', {'id': koh_utilisateur.id}) }}"><i
+                                            class="fa fa-eye"></i></a>
+                                {% if app.user.roleSuperAdminAndIsAdmin %}
+                                    {% if app.user.id == koh_utilisateur.id %}
+                                        <a class="btn btn-sm btn-warning"
+                                           href="{{ path('koh_utilisateur_edit', {'id': koh_utilisateur.id}) }}"><i
+                                                    class="fa fa-edit"></i></a>
+                                    {% endif %}
+                                    {% if koh_utilisateur.isActived %}
+                                        <a data-placement="left" title="Désactiver le compte"
+                                           href="{{ path('koh_utilisateur_desactivation_account', {'id': koh_utilisateur.id}) }}"
+                                           class="btn btn-sm btn-outline-dark"><i class="fa fa-arrow-down"></i></a>
+                                    {% else %}
+                                        <a data-placement="left" title="Activer le compte"
+                                           href="{{ path('koh_utilisateur_activation_account', {'id': koh_utilisateur.id}) }}"
+                                           class="btn btn-sm btn-outline-info"><i class="fa fa-arrow-up"></i></a>
+                                    {% endif %}
+                                    {% if koh_utilisateur.isAdmin %}
+                                        <a class="btn btn-sm btn-warning"
+                                           href="{{ path('koh_utilisateur_change_status', {'id': koh_utilisateur.id}) }}">
+                                            <i class="fa fa-thumbs-down"></i>
+                                        </a>
+                                    {% else %}
+                                        <a class="btn btn-sm btn-danger"
+                                           href="{{ path('koh_utilisateur_change_status', {'id': koh_utilisateur.id}) }}">
+                                            <i class="fa fa-thumbs-up"></i>
+                                        </a>
+                                    {% endif %}
+                                    <a data-placement="left" title="Renvoyer le lien de confirmation"
+                                       class="btn btn-sm btn-outline-dark"
+                                       href="{{ path('super_admin.utilisateur.resendConfirmation', { 'id': koh_utilisateur.id }) }}"><i
+                                                class="fa fa-mail-bulk"></i></a>
+                                    <form style="display: inline" method="post"
+                                          action="{{ path('koh_utilisateur_delete', {'id': koh_utilisateur.id}) }}"
+                                          onsubmit="return confirm('Êtes-vous sûr(e) de supprimer cet utilisateur ?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ koh_utilisateur.id) }}">
+                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="font-weight-bolder text-uppercase">Aucun enregistrement trouvé</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="pull-right pagination">
+                {{ knp_pagination_render(koh_utilisateurs) }}
+            </div>
+        {% endif %}
+    </div>
+    {% if app.user.roleSuperAdminAndIsAdmin %}
+        <a href="{{ path('koh_utilisateur_new') }}" class="btn btn-primary font-weight-bolder text-uppercase mt-3 mb-3">Créer
+            un
+            nouveau</a>
+    {% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

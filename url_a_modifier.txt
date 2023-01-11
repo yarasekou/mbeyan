@@ -1,0 +1,2 @@
+1- Le lien image dans register_admin
+2- Le lien de confirmation de compte admin dans register_admin

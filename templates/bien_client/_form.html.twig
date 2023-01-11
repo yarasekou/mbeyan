@@ -1,0 +1,240 @@
+{{ form_start(form, {'multipart': true, 'attr': {'onsubmit': 'return confirm("Êtes-vous sûr(e) des infos ?")'}}) }}
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="numero_expertise"><span class="text-danger font-weight-bold">(1)</span>&nbsp;Numero
+                expertise</label>
+            <input id="numero_expertise" type="text" class="form-control" name="numero_expertise" autofocus required>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="numero_dossier"><span class="text-danger font-weight-bold">(2)</span>&nbsp;Numero dossier mbeyan</label>
+            <input id="numero_dossier" type="text" class="form-control" name="numero_dossier" required autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="superficie"><span class="text-danger font-weight-bold">(3)</span>&nbsp;Superficie</label>
+            <input id="superficie" type="text" class="form-control" name="superifie" required autofocus>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="latitude"><span class="text-danger font-weight-bold">(4)</span>&nbsp;Latitude</label>
+            <input id="latitude" type="text" placeholder="48.862725" class="form-control" name="latitude" required
+                   autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="longitude"><span class="text-danger font-weight-bold">(5)</span>&nbsp;Longitude</label>
+            <input id="longitude" type="text" placeholder="2.287592" class="form-control" name="longitude" required
+                   autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="lastEvaluationPrice"><span class="text-danger font-weight-bold">(6)</span>&nbsp;Prix evaluation</label>
+            <input id="lastEvaluationPrice" placeholder="10000000" type="text" class="form-control"
+                   name="lastEvaluationPrice" required
+                   autofocus>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="bien_client_last_evaluation_date"><span class="text-danger font-weight-bold">(7)</span>&nbsp;Date
+                dernière évaluation</label>
+            <input id="bien_client_last_evaluation_date" name="last_evaluation_date" type="date" class="form-control"
+                   required autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="bien_client_next_evaluation_date"><span class="text-danger font-weight-bold">(8)</span>&nbsp;Date
+                prochaine évaluation</label>
+            <input id="bien_client_next_evaluation_date" name="next_evaluation_date" type="date" class="form-control"
+                   required autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold text-uppercase">(9)</span>&nbsp;{{ form_label(form.typeAcquisition) }}
+            {{ form_widget(form.typeAcquisition) }}
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="formAdjuction"></div>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(10)</span>&nbsp;{{ form_label(form.typeUsageBien) }}
+            {{ form_widget(form.typeUsageBien) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(11)</span>&nbsp;{{ form_label(form.typeDocument) }}
+            {{ form_widget(form.typeDocument) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(12)</span>&nbsp;{{ form_label(form.typeBien) }}
+            {{ form_widget(form.typeBien) }}
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(13)</span>&nbsp;{{ form_label(form.numeroDocument) }}
+            {{ form_widget(form.numeroDocument) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(14)</span>&nbsp;{{ form_label(form.ninacad) }}
+            {{ form_widget(form.ninacad) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="prenomProprietaire">
+                <span class="text-danger font-weight-bold">(15)</span>&nbsp;NOM proprietaire</label>
+            <input type="text" class="form-control text-uppercase" id="prenomProprietaire"
+                   placeholder="Nom & Prénom si client different du proprietaire" name="prenomProprietaire">
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoFoncier">
+
+</div>
+
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-6">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(16)</span>&nbsp;{{ form_label(form.typeCompte) }} client
+            {{ form_widget(form.typeCompte) }}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="clientKoh"> <span class="text-danger font-weight-bold text-uppercase">(17)</span>&nbsp;Client
+                mbeyan</label>
+            <select name="client_koh" id="clientKoh" class="form-control" required>
+                <option value="">{{ "-- Selectionner le client mbeyan --"|upper }}</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoClientBanque1">
+
+</div>
+
+<div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoClientBanque2">
+
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="date_fin_dation"> <span class="text-danger font-weight-bold">(18)</span>&nbsp;Date fin
+                dation</label>
+            <input type="date" id="date_fin_dation" name="date_fin_dation" class="form-control" autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="date_sorti_immobilisation"> <span class="text-danger font-weight-bold">(19)</span>&nbsp;Date
+                sorti immobilisation</label>
+            <input type="date" id="date_sorti_immobilisation" name="date_sorti_immobilisation" class="form-control"
+                   autofocus>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="iconImage"><span class="text-danger font-weight-bold">(20)</span>&nbsp;Icon associé</label>
+            <input type="file" accept="image/*" name="iconImage" class="form-control" required>
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-end text-danger font-weight-bold" id="clientParticulier">
+
+</div>
+
+<div class="form-row align-items-end text-danger font-weight-bold" id="clientStructure">
+
+</div>
+<hr>
+<div class="form-row align-items-end text-uppercase font-weight-bold">
+    <div class="col-md-4">
+        <div class="form-group">
+            <span class="text-danger font-weight-bold">(21)</span>&nbsp;{{ form_label(form.region) }}
+            {{ form_widget(form.region) }}
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="cercle"><span
+                        class="text-danger font-weight-bold text-uppercase">(22)</span>&nbsp;Cercle</label>
+            <select name="cercle" id="cercle" class="form-control" required>
+                <option class="text-uppercase" value="">-- Selectionner un cercle --</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="quartier"><span class="text-danger font-weight-bold">(23)</span>&nbsp;Quartier/Ville</label>
+            <input type="text" class="form-control" name="bien_quartier" id="quartier" required autofocus>
+        </div>
+    </div>
+</div>
+<hr>
+<div id="map"></div>
+<hr>
+<div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="memo"><span class="text-danger font-weight-bold">(24)</span> Memo</label>
+            <textarea class="form-control" name="memo" id="memo" cols="50" rows="10"></textarea>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="remarque"><span class="text-danger font-weight-bold">(25)</span> Remarque</label>
+            <textarea class="form-control" name="remarque" id="remarque" cols="50" rows="10"></textarea>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="other"><span class="text-danger font-weight-bold">(26)</span> Autre</label>
+            <textarea class="form-control" name="other" id="other" cols="50" rows="10"></textarea>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row ">
+    <div class="col-md-6 form-group">
+        <input type="hidden" name="quartier_latitude" id="quartier_latitude_hidden">
+    </div>
+
+    <div class="col-md-6 form-group">
+        <input type="hidden" name="quartier_longitude" id="quartier_longitude_hidden">
+    </div>
+</div>
+
+{{ form_widget(form) }}
+<button class="btn btn-dark font-weight-bolder float-right">{{ button_label|default('ENREGISTRER') }}</button>
+{{ form_end(form) }}

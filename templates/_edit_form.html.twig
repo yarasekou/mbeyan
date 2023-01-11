@@ -1,0 +1,277 @@
+<form onsubmit="return confirm('Êtes-vous sûr(e) des informations ?')" action="{{ path('bien_client_edit', {'id': bien.id}) }}" method="post" enctype="multipart/form-data">
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="numero_expertise">
+          <span class="text-danger font-weight-bold">(1)</span>&nbsp;Numero expertise</label>
+        <input id="numero_expertise" value="{{ bien.lastExpertise.NumeroExpertise }}" type="text" class="form-control" name="numero_expertise" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="numero_dossier">
+          <span class="text-danger font-weight-bold">(2)</span>&nbsp;Numero dossier mbeyan</label>
+        <input id="numero_dossier" value="{{ bien.lastExpertise.dossierMbeyan.numeroDossier }}" type="text" class="form-control" name="numero_dossier" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="superficie">
+          <span class="text-danger font-weight-bold">(3)</span>&nbsp;Superficie</label>
+        <input id="superficie" value="{{ bien.lastExpertise.superficie }}" type="text" class="form-control" name="superifie" required="required">
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="latitude">
+          <span class="text-danger font-weight-bold">(4)</span>&nbsp;Latitude</label>
+        <input id="latitude" value="{{ bien.lastExpertise.latitude }}" type="text" class="form-control" name="latitude" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="longitude">
+          <span class="text-danger font-weight-bold">(5)</span>&nbsp;Longitude</label>
+        <input id="longitude" value="{{ bien.lastExpertise.longitude }}" type="text" class="form-control" name="longitude" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="lastEvaluationPrice">
+          <span class="text-danger font-weight-bold">(6)</span>&nbsp;Prix evaluation</label>
+        <input id="lastEvaluationPrice" value="{{ bien.lastExpertise.lastEvaluationPrice }}" type="number" class="form-control" name="lastEvaluationPrice" required="required">
+      </div>
+    </div>
+  </div>
+  <hr>
+
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="bien_client_last_evaluation_date">
+          <span class="text-danger font-weight-bold">(7)</span>&nbsp;Date dernière évaluation</label>
+        <input id="bien_client_last_evaluation_date" {% if bien is defined %} value="{{ bien.lastExpertise.dateEvaluation is null ? " " : bien.lastExpertise.dateEvaluation.format('Y-m-d')|date('Y-m-d') }}" {% endif %} name="last_evaluation_date" type="date" class="form-control" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="bien_client_next_evaluation_date">
+          <span class="text-danger font-weight-bold">(8)</span>&nbsp;Date prochaine évaluation</label>
+        <input id="bien_client_next_evaluation_date" {% if bien is defined %} value="{{ bien.lastExpertise.dateNextEvaluation is null ? " " : bien.lastExpertise.dateNextEvaluation.format('Y-m-d')|date('Y-m-d') }}" {% endif %} name="next_evaluation_date" type="date" class="form-control" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="bien_client_typeAcquisition">
+          <span class="text-danger font-weight-bold">(9)</span>&nbsp; TYPE ACQUISITION</label>
+        <select name="bien_client[typeAcquisition]" id="bien_client_typeAcquisition" class="form-control" required="required" autofocus="autofocus">
+          <option value="">-- CHOISIR UN TYPE ACQUISITION --</option>
+          {% for typeAcquisition in typeAcquisitions %}
+            <option {% if bien.lastExpertise.typeAcquisition == typeAcquisition %} selected="selected" {% endif %} value="{{ typeAcquisition.id }}">{{ typeAcquisition.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="formAdjuction"></div>
+
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="typeUsage">
+          <span class="text-danger font-weight-bold">(10)</span>&nbsp;TYPE USAGE BIEN</label>
+        <select name="bien_client[typeUsageBien]" id="typeUsage" class="form-control" required="required" autofocus="autofocus">
+          <option value="">-- CHOISIR TYPE USAGE BIEN --</option>
+          {% for typeUsage in typeUsages %}
+            <option {% if bien.lastExpertise.typeUsageBien == typeUsage %} selected="selected" {% endif %} value="{{ typeUsage.id }}">{{ typeUsage.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="bien_client_typeDocument">
+          <span class="text-danger font-weight-bold">(11)</span>&nbsp;TYPE DOCUMENT</label>
+        <select name="bien_client[typeDocument]" id="bien_client_typeDocument" class="form-control" required="required" autofocus="autofocus">
+          <option value="">-- CHOISIR TYPE DOCUMENT --</option>
+          {% for typeDocument in typeDocuments %}
+            <option {% if bien.lastExpertise.typeDocumentPropriete == typeDocument %} selected="selected" {% endif %} value="{{ typeDocument.id }}">{{ typeDocument.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="typeBien">
+          <span class="text-danger font-weight-bold">(12)</span>&nbsp;TYPE BIEN</label>
+        <select name="bien_client[typeBien]" id="typeDocument" class="form-control" required="required" autofocus="autofocus">
+          <option value="">-- CHOISIR TYPE BIEN --</option>
+          {% for typeBien in typeBiens %}
+            <option {% if bien.lastExpertise.typeBien == typeBien %} selected="selected" {% endif %} value="{{ typeBien.id }}">{{ typeBien.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="documentTF">
+          <span class="text-danger font-weight-bold">(13)</span>&nbsp;NUMERO TF</label>
+        <input type="text" name="bien_client[numeroDocument]" id="documentTF" class="form-control" value="{{ bien.numeroDocument|upper }}" required="required">
+      </div>
+    </div>
+    <div class="col-md-4">
+      {% set infoProprio = bien.lastExpertise.infoProprietaire | split(' ', 2) %}
+      <div class="form-group">
+        <label for="bien_client[ninacad]">
+          <span class="text-danger font-weight-bold">(14)</span>&nbsp; NINACAD</label>
+        <input type="text" class="form-control" id="bien_client[ninacad]" value="{{ bien.ninacad }}" name="bien_client[ninacad]">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="infoProprietaire">
+          <span class="text-danger font-weight-bold">(15)</span>&nbsp;Proprietaire</label>
+        <input type="text" class="form-control" id="infoProprietaire" value="{{ bien.lastExpertise.infoProprietaire }}" name="prenomProprietaire">
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoFoncier"></div>
+
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="bien_client_typeCompte">
+          <span class="text-danger font-weight-bold">(16)</span>&nbsp;TYPE COMPTE CLIENT</label>
+        <select name="bien_client[typeCompte]" id="bien_client_typeCompte" class="form-control" required="required" autofocus="autofocus">
+          <option value="">-- CHOISIR TYPE COMPTE CLIENT --</option>
+          {% for typeCompte in typeComptes %}
+            <option {% if bien.kohUtilisateur.typeCompte == typeCompte %} selected="selected" {% endif %} value="{{ typeCompte.id }}">{{ typeCompte.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label for="clientKoh">
+          <span class="text-danger font-weight-bold">(17)</span>&nbsp;Client mbeyan <span class="text-danger font-weight-bold"> (*)</span></label>
+        <select name="client_koh" id="clientKoh" class="form-control" required>
+          <option value="">-- Selectionner le client mbeyan --</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoClientBanque1"></div>
+
+  <div class="form-row align-items-end text-uppercase text-danger font-weight-bold" id="infoClientBanque2"></div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="date_fin_dation">
+          <span class="text-danger font-weight-bold">(18)</span>&nbsp;Date fin dation</label>
+        <input type="date" id="date_fin_dation" value="{{ bien.lastExpertise.dateFinDation is null ? " " : bien.lastExpertise.dateFinDation.format('Y-m-d')|date('Y-m-d') }}" name="date_fin_dation" class="form-control">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="date_sorti_immobilisation">
+          <span class="text-danger font-weight-bold">(19)</span>&nbsp;Date sorti immobilisation</label>
+        <input type="date" id="date_sorti_immobilisation" value="{{ bien.lastExpertise.dateSortieImmobilisation is null ? " " : bien.lastExpertise.dateSortieImmobilisation.format('Y-m-d')|date('Y-m-d') }}" name="date_sorti_immobilisation" class="form-control">
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="iconImage">
+          <span class="text-danger font-weight-bold">(20)</span>&nbsp;Icon associé</label>
+        <input type="file" accept="image/x-png,image/gif,image/jpeg" name="iconImage" class="form-control">
+      </div>
+    </div>
+  </div>
+
+  <div class="form-row align-items-end text-danger font-weight-bold" id="clientParticulier"></div>
+
+  <div class="form-row align-items-end text-danger font-weight-bold" id="clientStructure"></div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="bien_client_region">
+          <span class="text-danger font-weight-bold">(21)</span>&nbsp;LA REGION</label>
+        <select name="bien_client[region]" id="bien_client_region" class="form-control" autofocus="autofocus">
+          <option value="">-- CHOISIR UNE REGION --</option>
+          {% for region in regions %}
+            <option value="{{ region.id }}">{{ region.name|upper }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="cercle">
+          <span class="text-danger font-weight-bold">(22)</span>&nbsp;LE CERCLE</label>
+        <select name="cercle" id="cercle" class="form-control">
+          <option value="">-- Selectionner un cercle --</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="quartier">
+          <span class="text-danger font-weight-bold">(23)</span>&nbsp;Quartier/Ville</label>
+        <input value="{{ bien.quartier.name }}" type="text" class="form-control" name="bien_quartier" id="quartier">
+      </div>
+    </div>
+  </div>
+  <hr>
+  <div id="map"></div>
+  <hr>
+  <div class="form-row align-items-end text-uppercase">
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="memo">
+          <span class="text-danger font-weight-bold">(24)</span>
+          Memo</label>
+        <textarea class="form-control" name="memo" id="memo" cols="30" rows="10">{{ bien.lastExpertise.memo }}</textarea>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="remarque">
+          <span class="text-danger font-weight-bold">(25)</span>
+          Remarque</label>
+        <textarea class="form-control" name="remarque" id="remarque" cols="30" rows="10">{{ bien.lastExpertise.remarque }}</textarea>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="form-group">
+        <label for="other">
+          <span class="text-danger font-weight-bold">(26)</span>
+          Autre</label>
+        <textarea class="form-control" name="other" id="other" cols="30" rows="10">{{ bien.lastExpertise.other }}</textarea>
+      </div>
+    </div>
+  </div>
+  <div class="form-row ">
+    <div class="col-md-6 form-group">
+      <input type="hidden" name="quartier_latitude" id="quartier_latitude_hidden">
+    </div>
+
+    <div class="col-md-6 form-group">
+      <input type="hidden" name="quartier_longitude" id="quartier_longitude_hidden">
+    </div>
+  </div>
+
+  <div class="form-group">
+
+    <button class="btn btn-dark float-right">{{ button_label|default('ENREGISTRER') }}</button>
+  </div>
+</form>

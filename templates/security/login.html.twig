@@ -1,0 +1,62 @@
+{% extends 'base-login.html.twig' %}
+
+{% block title %}MBEYAN: connexion{% endblock %}
+
+{% block body %}
+    <div class="header" style="margin-top: 100px;"></div>
+    <div class="col-md-4 offset-md-4 mt-5 mb-5">
+        <form class="card" method="post">
+            <div class="card-header bg-info">
+                <h5 class="text-white font-weight-normal text-uppercase">Page d'authentification</h5>
+            </div>
+            <div class="card-body">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message|trans }}
+                    </div>
+                {% endfor %}
+
+                {% if error %}
+                    <div class="alert alert-danger text-center font-weight-bolder mt-3 mb-3">ERREUR EMAIL OU MOT DE
+                        PASSE
+                    </div>
+                {% endif %}
+
+                {% if app.user %}
+                    <div class="mb-3">
+						<span class="small">Vous êtes déjà connecter en tant que
+						{{ app.user.email }},
+						<a href="{{ path('app_logout') }}">Mais vous pouvez vous reconnectez ici</a></span>
+                    </div>
+                {% endif %}
+                <div class="form-group mb-4">
+                    <label for="inputEmail">ADRESSE EMAIL</label>
+                    <input type="email" value="{{ last_username }}" name="_username" id="inputEmail"
+                           class="form-control" required autofocus>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="inputPassword">MOT DE PASSE</label>
+                    <input type="password" name="_password" id="inputPassword" class="form-control" required>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                </div>
+                <div class="form-group">
+                    <div class="checkbox mb-4">
+                        <label>
+                            <input type="checkbox" name="_remember_me">
+                            SE SOUVENIR DE MOI
+                        </label>
+                    </div>
+                </div>
+
+                <p class="text-center mt-3">
+                    <button class="btn btn-info pull-right" type="submit">
+                        <i class="fa fa-check-circle-o"></i>&nbsp;SE CONNECTER
+                    </button>
+                </p>
+            </div>
+        </form>
+    </div>
+{% endblock %}
+
+{% block footer '' %}

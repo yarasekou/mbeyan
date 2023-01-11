@@ -1,0 +1,84 @@
+{% extends 'base_structure.html.twig' %}
+
+{% block title %}
+    Mbeyan: Profile utilisateur de la structure {{ app.user.structure.name }}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="col-md-10 offset-md-1 mt-3">
+            <div class="card">
+                <div class="row card-body">
+                    <div class="col-md-3 bx-border-right">
+                        <p class="text-center mb-3">
+                            {% if koh_utilisateur.imageProfile == null %}
+                                <img style="border-radius: 50%" src="{{ asset('images/user.jpg') }}" width="75px"
+                                     height="75px" class="c-avatar-img" alt="image profile">
+                            {% else %}
+                                <img style="border-radius: 50%" src="/images/users/{{ koh_utilisateur.imageProfile }}"
+                                     width="75px" height="75px" class="c-avatar-img"
+                                     alt="image profile">
+                            {% endif %}
+                        </p>
+                        <p class="text-center">
+                            <button class="btn btn-sm btn-danger" data-toggle="modal"
+                                    data-target="#modalImage">MODIFIER</button>
+                        </p>
+                    </div>
+                    <div class="col-md-9">
+                        <h5 class="h5 font-weight-bolder text-uppercase mt-3">Informations</h5>
+                        <ul class="list-unstyled list-group-accent">
+                            <li class="list-group-item-accent-danger mb-2"><span
+                                        class="ml-3 font-weight-bolder">NOM : {{ koh_utilisateur.lastName }}</span></li>
+                            <li class="list-group-item-accent-danger mb-2"><span class="ml-3 font-weight-bolder">PRENOM : {{ koh_utilisateur.firstName }}</span>
+                            </li>
+                            <li class="list-group-item-accent-danger mb-2"><span
+                                        class="ml-3 font-weight-bolder">EMAIL : {{ koh_utilisateur.email }}</span></li>
+                            <li class="list-group-item-accent-danger mb-2"><span class="ml-3 font-weight-bolder">TELEPHONE : {{ koh_utilisateur.telephone }}</span>
+                            </li>
+                            <hr>
+                            <li class="list-group-item-accent-danger mb-3"><span
+                                        class="ml-3 font-weight-bolder text-uppercase">STRUCTURE : {{ koh_utilisateur.typeCompte.name }} : {{ koh_utilisateur.structure.name }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modalImage" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-weight-bolder text-uppercase" id="exampleModalLabel">CHANGER IMAGE
+                        PROFILE</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ path('admin.utilisateurs.change_user_profile') }}" enctype="multipart/form-data"
+                      class="modal-body" method="post">
+                    <div class="form-group">
+                        <label for="image">Choisir une image</label>
+                        <input id="image" accept="image/gif, image/png, image/jpeg" type="file" class="form-control"
+                               name="profile_user" required alt="">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary float-right">CHANGER</button>
+                        <button type="reset" class="btn btn-danger float-right mr-1" data-dismiss="modal">ANNULER
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

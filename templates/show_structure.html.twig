@@ -1,0 +1,40 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title 'La structure du client' %}
+
+{% block stylesheets %}
+    <style>
+        .image-cercle {
+            border-color: #1a107c;
+            border-radius: 50%;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 border-right">
+                        <p class="text-center">
+                            <img src="/images/structures/{{ structure.logoStructure }}" width="100px" height="100px" alt="logo de la structure">
+                        </p>
+                        <hr>
+                        <p class="ml-1"><i class="fa fa-envelope-open-text"></i>&nbsp; {{ structure.name }}</p>
+                        <p class="ml-1"><i class="fa fa-map-marked"></i>&nbsp; {{ structure.adresse }}</p>
+                        <p class="ml-1"><i class="fa fa-phone-alt"></i>&nbsp; {{ structure.telephone }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="font-weight-bolder">Les utilisateurs de {{ structure.name }}</h6>
+                        <ul class="list-unstyled">
+                            {% for user in structure.kohUtilisateurs %}
+                                <li class="list-group-item">{{ user.firstName }} {{ user.lastName }} <a class="float-right btn btn-sm btn-primary" href="{{ path('koh_utilisateur_show', { 'id': user.id }) }}"><i class="fa fa-eye"></i></a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

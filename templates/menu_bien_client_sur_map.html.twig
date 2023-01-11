@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}Welcome!
+        {% endblock %}
+    </title>
+    <link rel="shortcut icon" href="{{ asset('images/logo-mbeyan.jpeg') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/font/font.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/perfect-scrollbar.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/coreui.css') }}">
+    <link href="{{ asset('dashboard/css/select2.css') }}" rel="stylesheet"/>
+    <script src="{{ asset('dashboard/js/jquery.js') }}"></script>
+    <script src="{{ asset('dashboard/js/select2.js') }}"></script>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="c-app">
+<div class="c-sidebar c-sidebar-light c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand bg-light d-lg-down-none">
+        {% if app.user.typeCompte.isStructure %}
+            <img class="c-sidebar-brand-full" width="118" height="46"
+                 alt="CoreUI Logo" {% if app.user.structure.logoStructure != null %} src="/images/structures/{{ app.user.structure.logoStructure }}" {% endif %}>
+            <img class="c-sidebar-brand-minimized" width="46" height="46"
+                 alt="CoreUI Logo" {% if app.user.structure.logoStructure != null %} src="/images/structures/{{ app.user.structure.logoStructure }}" {% endif %}>
+        {% else %}
+            <img class="c-sidebar-brand-full" width="118" height="46" alt="Logo client"
+                 src="{{ asset('images/koh-logo.png') }}">
+            <img class="c-sidebar-brand-minimized" width="46" height="46" alt="Logo client"
+                 src="{{ asset('images/koh-logo.png') }}">
+        {% endif %}
+    </div>
+    <ul class="c-sidebar-nav">
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" {% if app.user.typeCompte.isStructure %} href="{{ path('admin_structure.home') }}" {% else %} href="{{ path('admin_particulier.home') }}" {% endif %}>
+                <i class="fa fa-dashboard c-sidebar-nav-icon"></i>TABLEAU DE BORD</a>
+        </li>
+        {% block filter %}
+            <li class="c-sidebar-nav-item">
+                <hr>
+                <h6 class="font-weight-bold text-uppercase text-left ml-3">FILTRER LES BIENS</h6>
+                <form action="#">
+                    <input type="hidden" class="form-control" id="hiddenUser" value="{{ id }}">
+
+                    <p class="text-center">
+                        <button class="btn btn-success mt-3" type="button" id="COCHER">TOUT COCHER/DECOCHER</button>
+                    </p>
+                    <ul class="list-group mt-3 mr-3 ml-3" id="list-biens"></ul>
+                </form>
+
+                <p class="text-center font-weight-bold mt-3 text-uppercase d-none" id="total_montant"></p>
+
+                <div class="btn-group-sm text-center mt-3">
+                    <button class="btn btn-success btn-sm d-none" type="button" id="btn-total">TOTALE</button>
+                    <button class="btn btn-success btn-sm d-none" type="button" id="btn-export">
+                        <i class="fa fa-file-excel-o"></i>EXPORTER
+                    </button>
+                </div>
+
+
+                <p class="text-center mt-3">
+                    <button class="btn btn-warning d-none" id="btn-annuler">ANNULER FILTRE</button>
+                </p>
+            </li>
+        {% endblock %}
+    </ul>
+</div>
+<div class="c-wrapper c-fixed-components">
+    <header class="c-header c-header-dark c-header-fixed c-header-with-subheader">
+        <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+            <i class="fa fa-align-justify c-icon c-icon-lg"></i>
+        </button>
+        <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+            <i class="fa fa-align-justify c-icon c-icon-lg"></i>
+        </button>
+
+        <ul class="c-header-nav ml-auto mr-4">
+            <li class="c-header-nav-item dropdown">
+                <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">
+                    <span class="font-weight-bold text-uppercase mr-2">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+                    <div class="c-avatar">
+                        <img class="c-avatar-img" {% if app.user.imageProfile != null and app.user.imageProfile != '' %} src="/images/users/{{ app.user.imageProfile }}" {% else %} src="{{ asset('images/user.jpg') }}" {% endif %}
+                             alt="image utilisateur">
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right pt-0">
+                    <div class="dropdown-header bg-light py-2">
+                        <strong>MON COMPTE</strong>
+                    </div>
+                    <a class="dropdown-item" {% if app.user.typeCompte.isStructure %} href="{{ path('admin_structure.home') }}" {% else %} href="{{ path('admin_particulier.home') }}" {% endif %}>
+                        <i class="fa fa-home text-dark c-icon"></i>
+                        &nbsp;MON COMPTE</a>
+
+                    <a class="dropdown-item" href="{{ path('admin.utilisateur.profile', {'id': app.user.id}) }}">
+                        <i class="fa fa-user-circle text-dark c-icon"></i>
+                        &nbsp;PROFILE</a>
+                    <a class="dropdown-item" href="{{ path('app_logout') }}">
+                        <i class="fa fa-sign-out-alt text-dark c-icon"></i>
+                        &nbsp;DECONNEXION</a>
+                </div>
+            </li>
+        </ul>
+
+        {% block breadcrump %}
+
+        {% endblock %}
+    </header>
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid"> {% block body %}{% endblock %}
+            </div>
+        </main>
+        <footer class="bg-dark">
+            <div class="container">
+                <p class="text-center text-white font-weight-bolder"><br>KOH POLY EXPERTISE {{ "now"|date('Y') }} &copy;.
+                    Tous droits réservés</p>
+            </div>
+        </footer>
+    </div>
+</div>
+<script src="{{ asset('dashboard/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ asset('dashboard/js/popper.js') }}"></script>
+<script src="{{ asset('dashboard/js/coreui.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

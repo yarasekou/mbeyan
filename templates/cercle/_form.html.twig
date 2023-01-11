@@ -1,0 +1,30 @@
+{{ form_start(form, {'attr': {'id': 'formAdd', 'onsubmit': 'return confirm("Êtes-vous sûr(e) des infos ?")'}}) }}
+
+<div id="map" class="mt-5"></div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-6 form-group">
+        {{ form_row(form.region) }}
+    </div>
+    <div class="col-md-6 form-group">
+        {{ form_row(form.name) }}
+    </div>
+</div>
+<div class="form-row align-items-end">
+    <div class="col-md-6 form-group">
+        <div class="form-group">
+            {{ form_row(form.latitude) }}
+        </div>
+    </div>
+    <div class="col-md-6 form-group">
+        <div class="form-group">
+            {{ form_row(form.longitude) }}
+        </div>
+    </div>
+</div>
+{{ form_widget(form) }}
+<div class="btn-group float-right">
+    <button type="button" id="btnFind" class="btn btn-outline-warning" onclick="findLocalite()">VERIFIER</button>
+    <button class="btn btn-dark">{{ button_label|default('ENREGISTRER') }}</button>
+</div>
+{{ form_end(form) }}

@@ -1,0 +1,124 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title 'Mbeyan: gestion des clients' %}
+
+{% block body %}
+    <div class="container">
+        <h5 class="font-weight-bold text-uppercase">
+            &nbsp;Les clients mbeyan
+        </h5>
+        <hr>
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('danger') %}
+            <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% if clients is not empty %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover font-weight-bold text-uppercase text-center table-striped">
+                    <thead>
+                    <tr class="bg-dark text-white">
+                        <th>NOM</th>
+                        <th>PRENOM</th>
+                        <th>EMAIL</th>
+                        <th>TYPE COMPTE</th>
+                        <th>STATUS</th>
+                        <th>ACTIF</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>{{ client.firstName }}</td>
+                            <td>{{ client.lastName }}</td>
+                            <td>{{ client.email }}</td>
+                            <td>
+                                {% if client.typeCompte != null %}
+                                    {% if client.typeCompte.isStructure and client.structure != null %}
+                                        {{ client.typeCompte.name }} <span
+                                            class="text-danger font-weight-bold">({{ client.structure.name }})</span>
+                                    {% else %}
+                                        {{ client.typeCompte.name }}
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge badge-dark">non défini</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if client.status == 'complete' %}
+                                    <span class="badge badge-info text-uppercase">{{ client.status }}</span>
+                                {% else %}
+                                    <span class="badge badge-danger text-uppercase">{{ client.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if client.isActived %}
+                                    <span class="badge badge-info">OUI</span>
+                                {% else %}
+                                    <span class="badge badge-dark">NON</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    {% if app.user.isAdmin %}
+                                        <a class="btn btn-sm btn-warning" data-toggle="tooltip" data-placement="left"
+                                        title="Editer le compte"
+                                        href="{{ path('super_admin.clients.edit', { 'id': client.id }) }}"><i
+                                            class="fa fa-edit"></i></a>
+
+                                        <a class="btn btn-sm btn-outline-dark" data-toggle="tooltip" data-placement="left"
+                                           title="Renvoyer le lien de confirmation"
+                                           href="{{ path('super_admin.utilisateur.resendConfirmation', { 'id': client.id }) }}"><i
+                                                    class="fa fa-mail-bulk"></i></a>
+                                        {% if not client.isActived %}
+                                            <a class="btn btn-sm btn-primary" data-toggle="tooltip" data-placement="left"
+                                               title="Activer le compte"
+                                               href="{{ path('super_admin.clients.active_account', {'id': client.id}) }}">
+                                                <i class="fa fa-arrow-up"></i>
+                                            </a>
+                                        {% else %}
+                                            <a class="btn btn-sm btn-dark" data-toggle="tooltip" data-placement="left"
+                                               title="Désactiver le compte"
+                                               href="{{ path('super_admin.clients.desactive_account', {'id': client.id}) }}">
+                                                <i class="fa fa-arrow-down"></i>
+                                            </a>
+                                        {% endif %}
+                                    {% else %}
+                                        <button class="btn btn-sm btn-dark btn-sm disabled">AUCUNE ACTION</button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <td colspan="7" class="font-weight-bolder text-uppercase">AUCUN ENREGISTREMENT</td>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-danger text-center font-weight-bolder text-uppercase">
+                AUCUN ENREGISTREMENT
+            </div>
+        {% endif %}
+        {% if app.user.isAdmin %}
+            <a href="{{ path('super_admin.clients.new') }}" class="btn btn-primary mt-3 mb-3 font-weight-bold">NOUVEAU
+                CLIENT</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

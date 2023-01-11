@@ -1,0 +1,304 @@
+{% extends 'base_particulier.html.twig' %}
+
+{% block title %} Detail bien {% endblock %}
+
+{% block stylesheets %}
+    <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&callback=googleMapLoader&libraries=&v=weekly"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-gradient-dark">
+                <h5 class="font-weight-bold text-uppercase text-white">Detail bien
+                    {{ bien.numeroDocument }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-group text-uppercase">
+                            <li class="list-group-item">{{ bien.lastExpertise.typeDocumentPropriete.name }}
+                                {{ bien.numeroDocument }}</li>
+                            <li class="list-group-item">Géolocalisation : Lat :
+                                {{ bien.lastExpertise.latitude }}
+                                Lng:
+                                {{ bien.lastExpertise.longitude }}</li>
+                            <li class="list-group-item">Quartier :
+                                {{ bien.quartier.name }}</li>
+                            <li class="list-group-item">Superficie :
+                                {{ bien.lastExpertise.superficie }}
+                                m²
+                            </li>
+                            <li class="list-group-item">Type acquisition :
+                                {{ bien.lastExpertise.typeAcquisition.name }}</li>
+                            {% if bien.isForStructure %}
+                                <li class="list-group-item">Bien pour :
+                                    {{ bien.kohUtilisateur.structure.name }}</li>
+                                <li class="list-group-item">
+                                    CLIENT
+                                    {{ bien.kohUtilisateur.structure.name }}
+                                    {{ bien.lastExpertise.clientBanque.name }}</li>
+                            {% else %}
+                                <li class="list-group-item">BIEN POUR
+                                    :
+                                    {{ bien.kohUtilisateur.firstName }}
+                                    {{ bien.kohUtilisateur.lastName }}</li>
+                            {% endif %}
+                            <li class="list-group-item">DERNIERE EVALUATION
+                                :
+                                {{ bien.lastExpertise.dateEvaluation | date('d-m-Y') }}</li>
+                            <li class="list-group-item">PROCHAINE EVALUATION
+                                :
+                                {{ bien.lastExpertise.dateNextEvaluation | date('d-m-Y') }}</li>
+                            <li class="list-group-item">PRIX
+                                :
+                                {{ bien.lastExpertise.lastEvaluationPrice | number_format(2, '.', ',') }}
+                                FCFA
+                            </li>
+                            {% if bien.lastExpertise.dateEntree != null %}
+                                <li class="list-group-item">DATE ENTREE :
+                                    {{ bien.lastExpertise.dateEntree| date('d-m-Y') }}</li>
+                            {% endif %}
+                            {% if bien.lastExpertise.dateSortieImmobilisation != null %}
+                                <li class="list-group-item">DATE SORTIE IMMOBILISATION
+                                    :
+                                    {{ bien.lastExpertise.dateSortieImmobilisation| date('d-m-Y') }}</li>
+                            {% endif %}
+                            {% if bien.lastExpertise.dateFinDation != null %}
+                                <li class="list-group-item">FIN DATION :
+                                    {{ bien.lastExpertise.dateFinDation| date('d-m-Y') }}</li>
+                            {% endif %}
+                        </ul>
+                        <input type="hidden" id="hiddenUser" class="form-control" value="{{ bien.numeroDocument }}">
+                    </div>
+                    <div id="map" class="col-md-6"></div>
+                </div>
+
+                <hr>
+
+                {% if bien.lastExpertise.documentImages.count != 0 %}
+                    <h6 class="text-uppercase font-weight-bold mt-3">LES PHOTOS DU BIEN</h6>
+                    <div class="row">
+                        {% for img in bien.lastExpertise.documentImages %}
+                            <div class="col-md-3 card">
+                                <img src="/biens/documents/images/{{ img.name }}" height="250px;" alt="">
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if bien.lastExpertise.documentExpertises.count != 0 %}
+                    <h6 class="font-weight-bold text-uppercase mt-3">LES DOCUMENTS EXPERTISES</h6>
+                    <div class="row">
+                        {% for doc in bien.lastExpertise.documentExpertises %}
+                            <div class="col-md-3 card">
+                                <span class="bg-dark mt-2 small text-center">{{ doc.name }}</span>
+                                <p class="text-center mt-2">
+                                    <a href="/biens/documents/expertises/{{ doc.name }}" download="">
+                                        <button class="btn btn-success" {% if not app.user.isKohUser and not app.user.isAdmin %} disabled {% endif %}>
+                                            Télécharger
+                                        </button>
+                                    </a>
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if bien.lastExpertise.documentPdfs.count != 0 %}
+                    <h6 class="font-weight-bold text-uppercase mt-3">LES DOCUMENTS PDF</h6>
+                    <div class="row">
+                        {% for doc in bien.lastExpertise.documentPdfs %}
+                            <div class="col-md-3 card">
+                                <span class="bg-dark mt-2 small text-center">{{ doc.name }}</span>
+                                <p class="text-center mt-2">
+                                    <a href="/biens/documents/pdf/{{ doc.name }}" download="">
+                                        <button class="btn btn-success" {% if not app.user.isKohUser and not app.user.isAdmin %} disabled {% endif %}>
+                                            Télécharger
+                                        </button>
+
+                                    </a>
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if bien.lastExpertise.otherDocuments.count != 0 %}
+                    <h6 class="font-weight-bold text-uppercase mt-3">LES AUTRES DOCUMENTS</h6>
+                    <div class="row">
+                        {% for doc in bien.lastExpertise.otherDocuments %}
+                            <div class="col-md-3 card">
+                                <span class="bg-dark mt-2 small text-center">{{ doc.name }}</span>
+                                <p class="text-center mt-2">
+                                    <a href="/biens/documents/files/{{ doc.name }}" download="">
+                                        <button class="btn btn-success" {% if not app.user.isKohUser and not app.user.isAdmin %} disabled {% endif %}>
+
+                                            Télécharger
+                                        </button>
+                                    </a>
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    <script>
+        let numero = $('#hiddenUser').val();
+
+        function googleMapLoader() {
+            $.ajax({
+                url: '/koh_archivage/admin/biens-client/bien_by_numero',
+                dataType: 'json',
+                type: 'post',
+                data: {
+                    'numero': numero
+                },
+                success: function (data) {
+                    console.log('data :: ' + data.length);
+                    "use strict";
+                    initMap(data, false);
+                }
+            });
+        }
+
+        function transformDate(dateInit) {
+            let deadLine = new Date(dateInit).getTime();
+            let now = new Date().getTime();
+            let t = deadLine - now;
+            let days = Math.floor(t / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((t % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let min = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+            let sec = Math.floor((t % (1000 * 60)) / 1000);
+            return days + ' jour ' + hours + ' h ' + min + ' min ' + sec + ' s';
+        }
+
+        function initMap(data, isSearch) {
+            nbreBien = data.length;
+
+            let myLatLng = {
+                lat: 12.6392316,
+                lng: -8.0028892
+            };
+            let map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 12,
+                center: myLatLng,
+                mapTypeId: 'roadmap'
+            });
+
+            let firts = 0;
+            let cpt = 0;
+            for (const d of data) {
+                cpt++;
+                if (firts === 0) {
+                    let myLatLng = {
+                        lat: +d.latitude,
+                        lng: +d.longitude
+                    };
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 16,
+                        center: myLatLng,
+                        mapTypeId: 'roadmap'
+                    });
+                }
+                firts++;
+                myLatLng = {
+                    lat: +d.latitude,
+                    lng: +d.longitude
+                };
+                const image = {
+                    url: 'https://localhost:8000/images/map-logo.png',
+                    scaledSize: new google.maps.Size(75, 75), // scaled size
+                    origin: new google.maps.Point(0, 0), // origin
+                    anchor: new google.maps.Point(0, 0),
+                    labelOrigin: new google.maps.Point(35, 90)
+                };
+
+                let next_date_estimation = transformDate(d.next_evaluation_date.date);
+                let date_entree = '';
+                let date_sortie_immobilisation = '';
+                let date_fin_dation = '';
+                if (d.date_entree != null) {
+                    date_entree = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_entree.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_sortie_immobilisation != null) {
+                    date_sortie_immobilisation = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_sortie_immobilisation.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_fin_dation != null) {
+                    date_fin_dation = "<li class=\"mt-2\"><strong>Date fin dation : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_fin_dation.date)
+                    ) + "</span></strong></li>";
+                }
+
+                let title = d.type_document.toUpperCase() + ' ' + d.numero_document.toUpperCase() + ' /' + d.quartier.libelle.toUpperCase();
+                let color = '';
+                if (d.type_aquisition.libelle.toLowerCase() === 'En Exploitation'.toLocaleLowerCase()) {
+                    color = 'red';
+                } else
+                    color = 'black';
+
+
+                let marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    label: {
+                        text: title,
+                        fontWeight: 'bold',
+                        color: color,
+                        fontSize: '10px',
+                        content: title
+                    },
+                    icon: image
+                });
+
+                let head = '';
+
+                if (d.structure !== null) {
+                    head = 'Bien pour ' + d.structure.nom;
+                } else {
+                    head = 'BIEN POUR ' + d.koh_utilisateur.nom + ' ' + d.koh_utilisateur.prenom;
+                }
+
+                const contentString = "<div id=\"content\">\n" + "        <div id=\"siteNotice\"></div>\n" + "        <h5 id=\"firstHeading\" class=\"firstHeading text-uppercase\">" + head + "</h5>\n" + "        <div id=\"bodyContent\">\n" + "<ul class=\"list-group text-uppercase\">\n" + "        <li class=\"mt-2\"><strong>Latitude : " + d.latitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Longitude " + d.longitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Surface : " + d.superficie + " m² </strong></li>\n" + "        <li class=\"mt-2\"><strong>document : " + d.numero_document + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier expertise : " + d.dossier_koh + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier mbeyan : " + d.dossier_mbeyan + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Type acquisition : " + d.type_aquisition.libelle + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Date prochiane evaluation : <span class=\"text-danger font-weight-bold\" id='days'>" + next_date_estimation + " </strong></li>\n" + "        " + date_entree + " \n" + "        " + date_sortie_immobilisation + " \n" + "        " + date_fin_dation + " \n" + "         <p class=\"text-center mt-3\"><a href='" + d.lien + "'>cliquer sur ce lien pour plus de detail</a></p>\n" + "    </ul>\n" + "</div>";
+
+                let content = '<ul class="list-group">\n' + '        <li class="list-group-item"> DOCUMENT : ' + d.numero_document.toUpperCase() + '</li>\n' + '        <li class="list-group-item">EXPERTISE : ' + d.dossier_koh.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE ACQUISITION : ' + d.type_aquisition.libelle.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE DOCUMENT : ' + d.type_document.toUpperCase() + '</li>\n' + '    </ul>';
+
+                if (isSearch) {
+                    $('#list-biens').append("<li id=\"list-item" + cpt + "\" class=\"list-group-item\"><label for=\"check" + cpt + "\"></label><input value=\"" + d.numero_document + " \" id=\"check" + cpt + "\" type=\"checkbox\"\n" + "                                                                                   class=\"form-check-inline\">" + d.numero_document.toUpperCase() + "\n" + "<br><span class=\"ml-3 small\">" + d.quartier.libelle.toUpperCase() + "/" + d.type_document.toUpperCase() + "</span> " + "<br><span class=\"ml-3 small\">PRIX : <strong>" + String(d.prix_derniere_evaluation).replace(/(.)(?=(\d{3})+$)/g, '$1,') + "</strong> FCFA</span> " + "                    </li>");
+                }
+
+                const infowindow = new google.maps.InfoWindow({content: contentString});
+
+                const infoW = new google.maps.InfoWindow({content: content});
+
+// infoW.open(map, marker);
+
+
+                marker.addListener('click', function () {
+// infowindow.open(map, marker);
+// infoW.close();
+                });
+
+                google.maps.event.addListener(infoW, 'closeclick', function () {
+                    infoW.open(map, marker);
+                });
+
+                google.maps.event.addListener(infowindow, 'closeclick', function () {
+                    infoW.open(map, marker);
+                });
+            }
+        }
+    </script>
+
+{% endblock %}

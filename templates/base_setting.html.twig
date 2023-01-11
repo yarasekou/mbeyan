@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>
+        {% block title %}Welcome!{% endblock %}
+    </title>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="shortcut icon" href="{{ asset('images/logo-mbeyan.jpeg') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/font/font.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/perfect-scrollbar.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/coreui.css') }}">
+    <link href="{{ asset('dashboard/css/select2.css') }}" rel="stylesheet"/>
+    <script src="{{ asset('dashboard/js/jquery.js') }}"></script>
+    <script src="{{ asset('dashboard/js/select2.js') }}"></script>
+
+    {% block stylesheets %}{% endblock %}
+
+</head>
+<body class="c-app">
+<div class="c-sidebar c-sidebar-light c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand bg-light d-lg-down-none">
+        <img class="c-sidebar-brand-full" width="60" height="46" alt="Logon mbeyan"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+        <img class="c-sidebar-brand-minimized" width="46" height="46" alt="Logo mbeyan"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+    </div>
+    <ul class="c-sidebar-nav">
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('super_admin.home') }}">
+                <i class="fa fa-tachometer-alt c-sidebar-nav-icon "></i>TABLEAU DE BORD</a>
+        </li>
+        <li class="c-sidebar-nav-title">GESTIONS DE L'APPLICATION</li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('koh_utilisateur_index') }}">
+                <i class="fas fa-user-tie c-sidebar-nav-icon"></i>UTILISATEURS MBEYAN</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('type_compte_index') }}">
+                <i class="fa fa-user-graduate c-sidebar-nav-icon"></i>TYPE DE CLIENTS</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('type_acquisition_index') }}">
+                <i class="fa fa-cog c-sidebar-nav-icon"></i>TYPE ACQUISITION</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('type_document_propriete_index') }}">
+                <i class="fa fa-cog c-sidebar-nav-icon"></i>DOCUMENT PROPRIETE</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('type_usage_bien_index') }}">
+                <i class="fa fa-cog c-sidebar-nav-icon"></i>TYPE USAGE BIEN</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('type_bien_index') }}">
+                <i class="fa fa-cog c-sidebar-nav-icon"></i>TYPE BIEN</a>
+        </li>
+
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('super_admin.clients') }}">
+                <i class="fas fa-users c-sidebar-nav-icon"></i>CLIENTS MBEYAN</a>
+        </li>
+
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('super_admin.structures') }}">
+                <i class="fas fa-building c-sidebar-nav-icon"></i>STRUCTURES MBEYAN</a>
+        </li>
+
+        <li class="c-sidebar-nav-title">GESTIONS LOCALITE</li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('region_index') }}">
+                <i class="fas fa-map c-sidebar-nav-icon"></i>REGION</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('cercle_index') }}">
+                <i class="fas fa-map-marked-alt c-sidebar-nav-icon"></i>CERCLE</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('quartiers_index') }}">
+                <i class="fas fa-map-pin c-sidebar-nav-icon"></i>QUARTIES</a>
+        </li>
+        <li class="c-sidebar-nav-divider"></li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('koh_utilisateur_operation') }}">
+                <i class="fas fa-user-tag c-sidebar-nav-icon"></i>OPERATIONS SYS</a>
+        </li>
+    </ul>
+</div>
+<div class="c-wrapper c-fixed-components">
+    <header class="c-header c-header-light bg-dark c-header-fixed c-header-with-subheader">
+        <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto text-white" type="button"
+                data-target="#sidebar"
+                data-class="c-sidebar-show">
+            <i class="fa fa-align-justify text-white c-icon c-icon-lg"></i>
+        </button>
+        <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none text-white" type="button"
+                data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+            <i class="fa fa-align-justify text-white c-icon c-icon-lg"></i>
+        </button>
+
+        <ul class="c-header-nav ml-auto text-white mr-4">
+
+            <li class="c-header-nav-item dropdown">
+                <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">
+                    <span class="font-weight-bold text-white text-uppercase mr-2">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+                    <div class="c-avatar">
+                        <img class="c-avatar-img" {% if app.user.imageProfile != null and app.user.imageProfile != '' %} src="/images/users/{{ app.user.imageProfile }}" {% else %} src="{{ asset('images/user.jpg') }}" {% endif %}
+                             alt="image utilisateur">
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right text-white pt-0">
+                    <div class="dropdown-header bg-light py-2">
+                        <strong>MON COMPTE</strong>
+                    </div>
+                    <a class="dropdown-item" href="{{ path('super_admin.home') }}">
+                        <i class="fa fa-home text-dark c-icon"></i>
+                        &nbsp;DASHBOARD BIEN</a>
+                    <a class="dropdown-item" href="{{ path('app_logout') }}">
+                        <i class="fa fa-sign-out-alt text-dark c-icon"></i>
+                        &nbsp;DECONNEXION</a>
+                </div>
+            </li>
+        </ul>
+
+        {% block breadcrump %}{% endblock %}
+    </header>
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid">
+                {% block body %}{% endblock %}
+            </div>
+        </main>
+        <footer class="bg-dark">
+            <div class="container">
+                <p class="text-center text-white font-weight-bolder text-uppercase"><br>KOH POLY
+                    EXPERTISE {{ "now"|date('Y') }} &copy;. Tous droits réservés
+                </p>
+            </div>
+        </footer>
+    </div>
+</div>
+<script src="{{ asset('dashboard/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ asset('dashboard/js/popper.js') }}"></script>
+<script src="{{ asset('dashboard/js/coreui.js') }}"></script>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>

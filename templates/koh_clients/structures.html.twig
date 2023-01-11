@@ -1,0 +1,79 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title 'Mbeyan: gestion des clients' %}
+
+{% block body %}
+    <h5 class="font-weight-bold text-uppercase">
+        &nbsp;Les structures mbeyan
+    </h5>
+    <hr>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        {% if structures is not empty %}
+            <table class="table text-center table-bordered font-weight-bold text-uppercase table-responsive-sm table-striped mt-3 mb-3">
+                <thead>
+                <tr class="bg-dark text-white">
+                    <th>STRUCTURE</th>
+                    <th>ADRESSE</th>
+                    <th>TELEPHONE</th>
+                    <th>ACTIONS</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for structure in structures %}
+                    <tr>
+                        <td>{{ structure.name }}</td>
+                        <td>{{ structure.adresse }}</td>
+                        <td>{{ structure.telephone }}</td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ path('super_admin.structures_show', { 'id': structure.id }) }}"
+                                   class="btn btn-sm btn-success"><i class="fa fa-eye"></i></a>
+                                {% if app.user.hasRoleSuperAdminAndIsAdmin %}
+                                    <a class="btn btn-warning btn-sm"
+                                       href="{{ path('super_admin.structure.edit', {'id': structure.id}) }}">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <form style="display: inline" method="post"
+                                          action="{{ path('super_admin.structures_delete', {'id': structure.id}) }}"
+                                          onsubmit="return confirm('La suppression entraînera celui des utilisateurs ainsi que les biens de cette structure. Êtes-vous de sûr(e) ?');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ structure.id) }}">
+                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                                    </form>
+                                {% endif %}
+
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <td colspan="5" class="font-weight-bolder text-uppercase">AUCUN ENREGISTREMENT</td>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-danger text-center font-weight-bolder text-uppercase">AUCUN ENREGISTREMENT</div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

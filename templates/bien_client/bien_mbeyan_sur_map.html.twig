@@ -1,0 +1,901 @@
+{% extends 'menu_bien_mbeyan_sur_map.html.twig' %}
+
+{% block title %} Les biens sur map {% endblock %}
+{% block stylesheets %}
+    <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&callback=googleMapLoader&libraries=&v=weekly"></script>
+{% endblock %}
+
+{% block body %}
+
+    <div class="col-md-12">
+        <div class="card">
+
+            <div class="card-body">
+                <div id="map" style="height: 500px; width: 100%"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    <script src="//cdn.rawgit.com/rainabba/jquery-table2excel/1.1.0/dist/jquery.table2excel.min.js"></script>
+
+    <script>
+        let filtre1 = $('#filter1');
+        let btnAddFilter = $('#btnAddFilter');
+        document.getElementById('typeClientFilerSelect').innerHTML = '';
+
+        filtre1.on('change', function () {
+            if (filtre1.find(':selected').val() !== '') {
+                let val = filtre1.find(':selected').val();
+
+                switch (val) {
+                    case 'typeClientFilter':
+                        document.getElementById('typeClientFilerSelect').innerHTML = '';
+                        break;
+                    case 'typeAcquisitionFilter':
+                        alert('Type acquisition !!!');
+                        break;
+                    case 'typeDocumentFilter':
+                        alert('Type de document !!!');
+                        break;
+                    case 'quartierFilter':
+                        alert('Quartier !!!')
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+        });
+
+    </script>
+
+    <script>
+        let bankContent = document.getElementById('form-banque');
+        let partContent = document.getElementById('form-part');
+        let typeFilter = $('#type_filter');
+        let isChecked = false;
+        let nbreBien = 0;
+
+        // Chargement du map
+        function googleMapLoader() {
+            $.ajax({
+                url: '/koh_biens/biens-client/get_biens',
+                dataType: 'json',
+                type: 'get',
+                success: function (data) {
+                    console.log('data :: ' + data.length);
+                    "use strict";
+                    initMap(data, false);
+                }
+            });
+        }
+
+        // Initialisation du map
+        function initMap(data, isSearch) {
+            nbreBien = data.length;
+            let myLatLng = {
+                lat: 12.6392316,
+                lng: -8.0028892
+            };
+
+            let map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 18,
+                center: myLatLng,
+
+            });
+            let cpt = 0;
+            for (const d of data) {
+                cpt++;
+                myLatLng = {
+                    lat: +d.latitude,
+                    lng: +d.longitude
+                }
+                const image = {
+                    url: d.logo,
+                    scaledSize: new google.maps.Size(75, 75), // scaled size
+                    origin: new google.maps.Point(0, 0), // origin
+                    anchor: new google.maps.Point(0, 0),
+                    labelOrigin: new google.maps.Point(35, 90)
+                };
+
+                let next_date_estimation = transformDate(d.next_evaluation_date.date);
+                let date_entree = '';
+                let date_sortie_immobilisation = '';
+                let date_fin_dation = '';
+                if (d.date_entree != null) {
+                    date_entree = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_entree.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_sortie_immobilisation != null) {
+                    date_sortie_immobilisation = "<li class=\"mt-2\"><strong>Date entree : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_sortie_immobilisation.date)
+                    ) + "</span></strong></li>";
+                }
+                if (d.date_fin_dation != null) {
+                    date_fin_dation = "<li class=\"mt-2\"><strong>Date fin dation : <span class=\"text-danger font-weight-bold\">" + (
+                        transformDate(d.date_fin_dation.date)
+                    ) + "</span></strong></li>";
+                }
+
+                let title = d.type_document.toUpperCase() + ' ' + d.numero_document.toUpperCase() + ' /' + d.quartier.libelle.toUpperCase();
+                let color = '';
+                if (d.type_aquisition.libelle.toLowerCase() === 'En Exploitation'.toLocaleLowerCase()) {
+                    color = 'red';
+                } else
+                    color = 'black';
+
+
+                let marker = new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    label: {
+                        text: title,
+                        fontWeight: 'bold',
+                        color: color,
+                        fontSize: '10px',
+                        content: title
+                    },
+                    icon: image
+                });
+
+                let head = '';
+
+                if (d.structure !== null) {
+                    head = 'Bien pour ' + d.structure.nom;
+                } else {
+                    head = 'BIEN POUR ' + d.koh_utilisateur.nom + ' ' + d.koh_utilisateur.prenom;
+                }
+
+                const contentString = "<div id=\"content\">\n" + "        <div id=\"siteNotice\"></div>\n" + "        <h5 id=\"firstHeading\" class=\"firstHeading text-uppercase\">" + head + "</h5>\n" + "        <div id=\"bodyContent\">\n" + "<ul class=\"list-group text-uppercase\">\n" + "        <li class=\"mt-2\"><strong>Latitude : " + d.latitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Longitude " + d.longitude + " </strong></li>\n" + "        <li class=\"mt-2\"><strong>Surface : " + d.superficie + " m² </strong></li>\n" + "        <li class=\"mt-2\"><strong>document : " + d.numero_document + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier expertise : " + d.dossier_koh + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Numero dossier mbeyan : " + d.dossier_mbeyan + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Type acquisition : " + d.type_aquisition.libelle + "</strong></li>\n" + "        <li class=\"mt-2\"><strong>Date prochiane evaluation : <span class=\"text-danger font-weight-bold\" id='days'>" + next_date_estimation + " </strong></li>\n" + "        " + date_entree + " \n" + "        " + date_sortie_immobilisation + " \n" + "        " + date_fin_dation + " \n" + "         <p class=\"text-center mt-3\"><a href='" + d.lien + "'>cliquer sur ce lien pour plus de detail</a></p>\n" + "    </ul>\n" + "</div>";
+
+                let content = '<ul class="list-group">\n' + '        <li class="list-group-item"> DOCUMENT : ' + d.numero_document.toUpperCase() + '</li>\n' + '        <li class="list-group-item">EXPERTISE : ' + d.dossier_koh.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE ACQUISITION : ' + d.type_aquisition.libelle.toUpperCase() + '</li>\n' + '        <li class="list-group-item">TYPE DOCUMENT : ' + d.type_document.toUpperCase() + '</li>\n' + '    </ul>';
+
+                if (isSearch) {
+                    $('#list-biens').append("<li id=\"list-item" + cpt + "\" class=\"list-group-item\"><label for=\"check" + cpt + "\"></label><input value=\"" + d.numero_document + " \" id=\"check" + cpt + "\" type=\"checkbox\"\n" + "                                                                                   class=\"form-check-inline\">" + d.numero_document.toUpperCase() + "\n" + "<br><span class=\"ml-3 small\">" + d.quartier.libelle.toUpperCase() + "/" + d.type_document.toUpperCase() + "</span> " + "<br><span class=\"ml-3 small\">PRIX : <strong>" + String(d.prix_derniere_evaluation).replace(/(.)(?=(\d{3})+$)/g, '$1,') + "</strong> FCFA</span> " + "                    </li>");
+                }
+
+                const infowindow = new google.maps.InfoWindow({content: contentString});
+
+                const infoW = new google.maps.InfoWindow({content: content});
+
+                // infoW.open(map, marker);
+
+
+                marker.addListener('click', function () {
+                    // infoW.close();
+                    infowindow.open(map, marker);
+                    //infoW.open(map, marker);
+                });
+
+                google.maps.event.addListener(infoW, 'closeclick', function () {
+                    // infowindow.open(map, marker);
+                    // infoW.close();
+                    // infowindow.close();
+                });
+
+                google.maps.event.addListener(infowindow, 'closeclick', function () {
+                    // infoW.open(map, marker);
+                    infowindow.close();
+                });
+            }
+        }
+
+        $(document).ready(function () {
+            document.getElementById('sidebar').classList.remove('c-sidebar-lg-show');
+        });
+
+        function hideContent() {
+            if (!bankContent.classList.contains('d-none')) {
+                bankContent.classList.add('d-none');
+            }
+
+            if (!partContent.classList.contains('d-none')) {
+                partContent.classList.add('d-none');
+            }
+        }
+
+        function loadData(type) {
+            $.ajax({
+                url: '/koh_archivage/admin/bien-client/get_bien_client_by_type_client',
+                type: 'post',
+                datatype: 'json',
+                data: {
+                    'type': type
+                },
+                success: function (data) {
+                    initMap(data, true);
+                }
+            })
+        }
+
+        typeFilter.on('change', function (e) {
+            let type = e.target.value;
+            hideContent();
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+            hideForm();
+
+            if (type === '1') {
+                document.getElementById('form-secondFilter').classList.add('d-none');
+                $('#banque').empty();
+                loadData('structure');
+                bankContent.classList.remove('d-none');
+                $.ajax({
+                    url: '/koh/client/client_by_type',
+                    datatype: 'json',
+                    type: 'post',
+                    data: {
+                        'type': 'structure'
+                    },
+                    success: function (data) {
+                        $('#banque').empty().append($('<option>', {
+                            value: '0',
+                            text: '-- Selectionner --'
+                        }));
+                        $.each(data, function (index, d) {
+                            $('#banque').append($('<option>', {
+                                value: d['id'],
+                                text: d['email']
+                            }));
+                        });
+                    }
+                });
+            }
+
+            if (type === '2') {
+                document.getElementById('form-secondFilter').classList.add('d-none');
+                $('#particulier').empty();
+                loadData('particulier');
+                partContent.classList.remove('d-none');
+                $.ajax({
+                    url: '/koh/client/client_by_type',
+                    datatype: 'json',
+                    type: 'post',
+                    data: {
+                        'type': 'particulier'
+                    },
+                    success: function (data) {
+                        $('#particulier').empty().append($('<option>', {
+                            value: '0',
+                            text: '-- Selectionner --'
+                        }));
+                        $.each(data, function (index, d) {
+                            $('#particulier').append($('<option>', {
+                                value: d['id'],
+                                text: d['email']
+                            }));
+                        });
+                    }
+                })
+            }
+
+            if (type === '3') {
+                document.getElementById('form-numero').classList.remove('d-none');
+                document.getElementById('btn-annuler').classList.remove('d-none');
+            }
+            if (type === '') {
+                initializeFilter();
+                document.getElementById('form-secondFilter').classList.add('d-none');
+                hideForm();
+            }
+        });
+
+        $('#numero_document').on('change', function () {
+            let numero = $('#numero_document').val();
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+            $.ajax({
+                url: '/koh_archivage/admin/biens-client/bien_by_numero',
+                type: 'post',
+                datatype: 'json',
+                data: {
+                    'numero': numero
+                },
+                success: function (data) {
+                    nbreBien = data.length;
+                    initMap(data, true);
+                    if (data.length !== 0) {
+                        document.getElementById('btn-annuler').classList.remove('d-none');
+                        document.getElementById('btn-total').classList.remove('d-none');
+                        document.getElementById('btn-export').classList.remove('d-none');
+                        document.getElementById('form-secondFilter').classList.remove('d-none');
+                    } else {
+                        document.getElementById('btn-annuler').classList.add('d-none');
+                        document.getElementById('btn-total').classList.add('d-none');
+                        document.getElementById('btn-export').classList.add('d-none');
+                        document.getElementById('form-secondFilter').classList.add('d-none');
+                    }
+                }
+            });
+        });
+
+        $('#banque').on('change', function (e) {
+
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+            $('#secondFilter').val('');
+            document.getElementById('form-secondFilter').classList.add('d-none');
+            hideForm();
+            let banque = e.target.value;
+            if (banque !== '0') {
+                getBien(banque);
+            } else {
+                loadData('structure');
+                hideForm();
+            }
+        });
+
+        function getBien(user) {
+            $.ajax({
+                url: '/koh_archivage/admin/biens-clients/get_biens_by_client',
+                datatype: 'json',
+                type: 'post',
+                data: {
+                    'id': user
+                },
+                success: function (data) {
+                    initMap(data, true);
+                    if (data.length !== 0) {
+                        document.getElementById('btn-annuler').classList.remove('d-none');
+                        document.getElementById('btn-total').classList.remove('d-none');
+                        document.getElementById('btn-export').classList.remove('d-none');
+                        document.getElementById('form-secondFilter').classList.remove('d-none');
+                    } else {
+                        document.getElementById('btn-annuler').classList.add('d-none');
+                        document.getElementById('btn-total').classList.add('d-none');
+                        document.getElementById('btn-export').classList.add('d-none');
+                        document.getElementById('form-secondFilter').classList.add('d-none');
+                    }
+                }
+            })
+        }
+
+        $('#particulier').on('change', function (e) {
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+            $('#secondFilter').val('');
+            document.getElementById('form-secondFilter').classList.add('d-none');
+            hideForm();
+            let part = e.target.value;
+            if (part !== '0') {
+                getBien(part);
+            } else {
+                loadData('particulier');
+                hideForm();
+            }
+        });
+
+        $('#secondFilter').on('change', function (e) {
+            if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                let id = $('#banque').find(':selected').val();
+                getBien(id);
+            }
+            if (!document.getElementById('form-part').classList.contains('d-none')) {
+                let id = $('#particulier').find(':selected').val();
+                getBien(id);
+            }
+            if (e.target.value !== '') {
+                let val = +e.target.value;
+                for (let i = 1; i <= nbreBien; i++) {
+                    $('#list-biens #list-item' + i).remove();
+                }
+                document.getElementById('btn-total').classList.add('d-none');
+                document.getElementById('total_montant').classList.add('d-none');
+                document.getElementById('btn-export').classList.add('d-none');
+                $('#quartier').val('');
+                $('#date_prochaine_evaluation').val('');
+                $('#date_fin_dation').val('');
+                $('#date_sorti_immobilisation').val('');
+                loadForm(val);
+            } else {
+                hideForm();
+            }
+        });
+
+        $('#type_document').on('change', function (e) {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            if (e.target.value !== '') {
+                if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                    let id = $('#banque').find(':selected').val();
+                    let valeur = $('#type_document').find(':selected').text();
+                    let val = '5';
+                    getBienByCritere(val, valeur, id);
+                }
+                if (!document.getElementById('form-part').classList.contains('d-none')) {
+                    let id = $('#particulier').find(':selected').val();
+                    let valeur = $('#type_document').find(':selected').text();
+                    let val = '5';
+                    getBienByCritere(val, valeur, id);
+                }
+            } else {
+                if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                    let id = $('#banque').find(':selected').val();
+                    getBien(id);
+                }
+                if (!document.getElementById('form-part').classList.contains('d-none')) {
+                    let id = $('#particulier').find(':selected').val();
+                    getBien(id);
+                }
+            }
+        });
+
+        $('#type_acquisition').on('change', function (e) {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            if (e.target.value !== '') {
+                if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                    let id = $('#banque').find(':selected').val();
+                    let valeur = $('#type_acquisition').find(':selected').text();
+                    let val = '6';
+                    getBienByCritere(val, valeur, id);
+                }
+                if (!document.getElementById('form-part').classList.contains('d-none')) {
+                    let id = $('#particulier').find(':selected').val();
+                    let valeur = $('#type_acquisition').find(':selected').text();
+                    let val = '6';
+                    getBienByCritere(val, valeur, id);
+                }
+            } else {
+                if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                    let id = $('#banque').find(':selected').val();
+                    getBien(id);
+                }
+                if (!document.getElementById('form-part').classList.contains('d-none')) {
+                    let id = $('#particulier').find(':selected').val();
+                    getBien(id);
+                }
+            }
+        });
+
+        $('#quartier').on('change', function () {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+
+            if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                let id = $('#banque').find(':selected').val();
+                let valeur = $('#quartier').val();
+                let val = '1';
+
+                console.log('quartier == ' + valeur);
+                getBienByCritere(val, valeur, id);
+            }
+            if (!document.getElementById('form-part').classList.contains('d-none')) {
+                let id = $('#particulier').find(':selected').val();
+                let valeur = $('#quartier').val();
+                let val = '1';
+                console.log('quartier == ' + valeur);
+                getBienByCritere(val, valeur, id);
+            }
+        });
+
+        $('#date_prochaine_evaluation').on('input', function () {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+
+            if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                let id = $('#banque').find(':selected').val();
+                let valeur = $('#date_prochaine_evaluation').val();
+
+                let val = '2';
+
+                console.log('date == ' + valeur);
+
+                let isValid = Date.parse(valeur);
+
+                console.log('valid :: ' + isValid);
+
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+            if (!document.getElementById('form-part').classList.contains('d-none')) {
+                let id = $('#particulier').find(':selected').val();
+                let valeur = $('#date_prochaine_evaluation').val();
+                let val = '2';
+                console.log('date == ' + valeur);
+                let isValid = Date.parse(valeur);
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+        });
+
+        $('#date_fin_dation').on('input', function () {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+
+            if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                let id = $('#banque').find(':selected').val();
+                let valeur = $('#date_fin_dation').val();
+
+                let val = '3';
+
+                console.log('date == ' + valeur);
+
+                let isValid = Date.parse(valeur);
+
+                console.log('valid :: ' + isValid);
+
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+            if (!document.getElementById('form-part').classList.contains('d-none')) {
+                let id = $('#particulier').find(':selected').val();
+                let valeur = $('#date_fin_dation').val();
+                let val = '3';
+                console.log('date == ' + valeur);
+                let isValid = Date.parse(valeur);
+
+                console.log('valid :: ' + isValid);
+
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+        });
+
+        $('#date_sortie_immobilisation').on('input', function () {
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+
+            if (!document.getElementById('form-banque').classList.contains('d-none')) {
+                let id = $('#banque').find(':selected').val();
+                let valeur = $('#date_sortie_immobilisation').val();
+
+
+                let val = '4';
+
+                console.log('date == ' + valeur);
+
+                let isValid = Date.parse(valeur);
+
+                console.log('valid :: ' + isValid);
+
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+            if (!document.getElementById('form-part').classList.contains('d-none')) {
+                let id = $('#particulier').find(':selected').val();
+                let valeur = $('#date_sortie_immobilisation').val();
+                let val = '4';
+                console.log('date == ' + valeur);
+                let isValid = Date.parse(valeur);
+
+                console.log('valid :: ' + isValid);
+
+                if (!isNaN(isValid)) {
+                    console.log('query with :: ' + valeur);
+                    getBienByCritere(val, valeur, id);
+                }
+            }
+        });
+
+        function loadForm(choice) {
+            if (choice === 1) {
+                document.getElementById('form_quartier').classList.remove('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+                document.getElementById('form_date_fin_dation').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+                document.getElementById('form_type_document').classList.add('d-none');
+                document.getElementById('form_type_acquisition').classList.add('d-none');
+            }
+            if (choice === 2) {
+                document.getElementById('form_quartier').classList.add('d-none');
+                document.getElementById('form_date_fin_dation').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+                document.getElementById('form_type_document').classList.add('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.remove('d-none');
+                document.getElementById('form_type_acquisition').classList.add('d-none');
+            }
+            if (choice === 3) {
+                document.getElementById('form_date_fin_dation').classList.remove('d-none');
+                document.getElementById('form_quartier').classList.add('d-none');
+                document.getElementById('form_type_acquisition').classList.add('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+                document.getElementById('form_type_document').classList.add('d-none');
+            }
+
+            if (choice === 4) {
+                document.getElementById('form_quartier').classList.add('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+                document.getElementById('form_date_fin_dation').classList.add('d-none');
+                document.getElementById('form_type_acquisition').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.remove('d-none');
+                document.getElementById('form_type_document').classList.add('d-none');
+            }
+
+            if (choice === 5) {
+                document.getElementById('form_quartier').classList.add('d-none');
+                document.getElementById('form_type_acquisition').classList.add('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+                document.getElementById('form_date_fin_dation').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+                document.getElementById('form_type_document').classList.remove('d-none');
+                $('#type_document').empty();
+                loadTypeDocuement();
+            }
+
+            if (choice === 6) {
+                document.getElementById('form_quartier').classList.add('d-none');
+                document.getElementById('form_type_acquisition').classList.remove('d-none');
+                document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+                document.getElementById('form_date_fin_dation').classList.add('d-none');
+                document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+                document.getElementById('form_type_document').classList.add('d-none');
+                $('#type_acquisition').empty();
+                loadTypeAcquisition();
+            }
+        }
+
+        function loadTypeAcquisition() {
+            $.ajax({
+                url: '/koh_archivage/admin/type_acquisitions/get_type_acquisition',
+                datatype: 'json',
+                type: 'get',
+                success: function (data) {
+                    $('#type_acquisition').empty().append($('<option>', {
+                        value: '',
+                        text: '-- Selectionner un type --'
+                    }));
+
+                    $.each(data, function (index, d) {
+                        $('#type_acquisition').append($('<option>', {
+                            value: d['id'],
+                            text: d['libelle']
+                        }));
+                    });
+                }
+            });
+        }
+
+        function loadTypeDocuement() {
+            $.ajax({
+                url: '/koh_archivage/admin/type_documents/get_type_document',
+                datatype: 'json',
+                type: 'get',
+                success: function (data) {
+                    $('#type_document').empty().append($('<option>', {
+                        value: '',
+                        text: '-- Selectionner un type --'
+                    }));
+
+                    $.each(data, function (index, d) {
+                        $('#type_document').append($('<option>', {
+                            value: d['id'],
+                            text: d['libelle']
+                        }));
+                    });
+                }
+            });
+        }
+
+        function getBienByCritere(val, value, id) {
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            let critere = '';
+            if (val === '1') {
+                critere = 'quartier';
+            }
+            if (val === '2') {
+                critere = 'date_prochaine_evaluation';
+            }
+            if (val === '3') {
+                critere = 'date_fin_dation';
+            }
+            if (val === '4') {
+                critere = 'date_sortie_immobilisation';
+            }
+            if (val === '5') {
+                critere = 'type_document';
+            }
+            if (val === '6') {
+                critere = 'type_acquisition';
+            }
+
+            console.log('requete :: ' + critere + ' ' + value + ' ' + id);
+
+            $.ajax({
+                url: '/koh_archivage/admin/bien-client/get_bien_client_by_critere',
+                type: 'post',
+                datatype: 'json',
+                data: {
+                    'critere': critere,
+                    'valeur': value,
+                    'id': id
+                },
+                success: function (data) {
+                    initMap(data, true);
+                    if (data.length !== null && data.length !== 0) {
+                        document.getElementById('btn-total').classList.remove('d-none');
+                        document.getElementById('btn-export').classList.remove('d-none');
+                    }
+                },
+                error: function (error) {
+                    console.log('error :: ' + JSON.stringify(error));
+                }
+            })
+        }
+
+        function hideForm() { // document.getElementById('form-secondFilter').classList.add('d-none');
+            document.getElementById('form_quartier').classList.add('d-none');
+            document.getElementById('form_date_prochaine_evaluation').classList.add('d-none');
+            document.getElementById('form_date_fin_dation').classList.add('d-none');
+            document.getElementById('form_date_sortie_immobilisation').classList.add('d-none');
+            document.getElementById('form_type_document').classList.add('d-none');
+            document.getElementById('form_type_acquisition').classList.add('d-none');
+        }
+
+        function initializeSelector() {
+            typeFilter.val('');
+            for (let i = 1; i <= nbreBien; i++) {
+                $('#list-biens #list-item' + i).remove();
+            }
+        }
+
+        function transformDate(dateInit) {
+            let deadLine = new Date(dateInit).getTime();
+            let now = new Date().getTime();
+            let t = deadLine - now;
+            let days = Math.floor(t / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((t % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let min = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+            let sec = Math.floor((t % (1000 * 60)) / 1000);
+            return days + ' jour ' + hours + ' h ' + min + ' min ' + sec + ' s';
+        }
+
+        function initializeFilter() {
+            googleMapLoader();
+            document.getElementById('btn-annuler').classList.add('d-none');
+            document.getElementById('btn-total').classList.add('d-none');
+            document.getElementById('total_montant').classList.add('d-none');
+            document.getElementById('btn-export').classList.add('d-none');
+            document.getElementById('form-secondFilter').classList.add('d-none');
+            document.getElementById('form-numero').classList.add('d-none');
+            $('#banque').empty();
+            $('#particulier').empty();
+            $('#secondFilter').val('');
+            $('#form-numero').val('');
+            $('#numero_document').val('');
+            hideContent();
+            initializeSelector();
+            hideForm();
+        }
+
+        $('#btn-annuler').on('click', function () {
+            initializeFilter();
+        });
+
+        $('#COCHER').on('click', function () {
+            if (!isChecked) {
+                $("#list-biens > li").each(function (index) {
+                    $(this).find('input').prop('checked', true);
+                });
+                isChecked = true;
+            } else {
+                $("#list-biens > li").each(function (index) {
+                    $(this).find('input').prop('checked', false);
+                });
+                isChecked = false;
+            }
+        });
+
+        $('#btn-total').on('click', function () {
+            let isCheck = false;
+            let total = 0;
+            for (let i = 1; i <= nbreBien; i++) {
+                if ($('#check' + i).prop('checked') === true) {
+                    isCheck = true;
+                    let numero = $('#check' + i).val();
+                    $.ajax({
+                        url: '/koh_archivage/admin/bien-client/get_bien_numero',
+                        type: 'post',
+                        datatype: 'json',
+                        data: {
+                            'numero': numero
+                        },
+                        async: false,
+                        success: function (data) {
+                            total = (total + parseFloat(data.prix_derniere_evaluation));
+                        }
+                    });
+                }
+            }
+            if (isCheck) {
+                document.getElementById('total_montant').classList.remove('d-none');
+                $('#total_montant').text('TOTAL ' + String(total).replace(/(.)(?=(\d{3})+$)/g, '$1,') + ' FCFA');
+            } else {
+                alert('aucun bien selectionné');
+            }
+        });
+
+        $('#btn-export').on('click', function () {
+            let isCheck = false;
+            for (let i = 1; i <= nbreBien; i++) {
+                if ($('#check' + i).prop('checked') === true) {
+                    isCheck = true;
+                    let numero = $('#check' + i).val();
+                    $.ajax({
+                        url: '/koh_archivage/admin/bien-client/get_bien_numero',
+                        type: 'post',
+                        datatype: 'json',
+                        data: {
+                            'numero': numero
+                        },
+                        async: false,
+                        success: function (data) {
+                            let date_entree = null;
+                            if (data.date_entree !== null) {
+                                date_entree = data.date_entree.date;
+                            }
+                            let date_sortie_immobilisation = null;
+                            if (data.date_sortie_immobilisation !== null) {
+                                date_sortie_immobilisation = data.date_sortie_immobilisation.date;
+                            }
+                            let date_fin_dation = null;
+                            if (data.date_fin_dation !== null) {
+                                date_fin_dation = data.date_fin_dation.date;
+                            }
+                            let client = '';
+                            if (data.client !== null) {
+                                client = data.client.nom;
+                            }
+
+                            let tr = '<tr>\n' + '            <td>' + data.id + '</td>\n' + '            <td>' + data.numero_document + '</td>\n' + '            <td>' + data.dossier_koh + '</td>\n' + '            <td>' + data.dossier_mbeyan + '</td>\n' + '            <td>' + data.latitude + '</td>\n' + '            <td>' + data.longitude + '</td>\n' + '            <td>' + data.type_document + '</td>\n' + '            <td>' + data.type_aquisition.libelle + '</td>\n' + '            <td>' + data.quartier.libelle + '</td>\n' + '            <td>' + data.last_evaluation_price + '</td>\n' + '            <td>' + data.superficie + '</td>\n' + '            <td>' + data.next_evaluation_date.date + '</td>\n' + '            <td>' + data.montant_acquisition + '</td>\n' + '            <td>' + data.frais_acquisition + '</td>\n' + '            <td>' + date_entree + '</td>\n' + '            <td>' + date_sortie_immobilisation + '</td>\n' + '            <td>' + date_fin_dation + '</td>\n' + '            <td>' + client + '</td>\n' + '            <td>' + data.proprio + '</td>\n' + '        </tr>';
+                            let table = $("table tbody");
+                            table.append(tr);
+                        }
+                    });
+                }
+            }
+            if (isCheck) {
+                $('#bien_table').table2excel({
+                    filename: "liste-de-bien-" + new Date().getDate() + "-" + new Date().getMonth() + "-" + new Date().getFullYear() + ".xls"
+                });
+            } else {
+                alert('aucun bien selectionné');
+            }
+        });
+    </script>
+
+{% endblock %}

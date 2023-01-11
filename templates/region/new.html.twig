@@ -1,0 +1,82 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Nouvelle région{% endblock %}
+
+{% block stylesheets %}
+
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&libraries=places"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
+
+{% endblock %}
+
+{% block body %}
+    <div class="card font-weight-bold text-uppercase">
+        <h5 class="card-header bg-dark text-white font-weight-bold text-uppercase">
+            Nouvelle région</h5>
+        <div class="card-body">
+            <div id="map"></div>
+            {{ include('region/_form.html.twig') }}
+
+            <a class="btn btn-primary font-weight-bold text-uppercase mt-3 mb-3" href="{{ path('region_index') }}">Retourner
+                à la
+                liste</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function findLocalite() {
+            let name = document.getElementById("region_name").value;
+            $.ajax({
+                url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + name + ',Mali&key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE',
+                datatype: 'json',
+                type: 'get',
+                success: function (data) {
+                    console.log('data :: ' + JSON.stringify(data));
+                    let result = (data.results)[0];
+                    let status = data.status;
+                    if (status === 'OK') {
+                        if (result.address_components[3].long_name === 'Mali') {
+                            document.getElementById('region_latitude').value = '' + result.geometry.location.lat;
+                            document.getElementById('region_longitude').value = '' + result.geometry.location.lng;
+                            document.getElementById('map').style.width = '100%';
+                            document.getElementById('map').style.height = '300px';
+                            document.getElementById('map').classList.add('mb-5');
+                            "use strict";
+                            initMap(result.geometry.location.lat, result.geometry.location.lng);
+                        } else {
+                            alert('Impossible de trouver les coodonnées de cette région');
+                            resetMap();
+                        }
+                    } else {
+                        alert('Impossible de trouver les coodonnées de cette région');
+                        resetMap();
+                    }
+                }
+            });
+        }
+        function initMap(lat, lng) {
+            let myLatLng = {
+                lat: lat,
+                lng: lng
+            };
+            let mapOptions = {
+                zoom: 8,
+                center: myLatLng,
+                mapTypeId: 'hybrid',
+                labels: true
+            };
+            new google.maps.Map(document.getElementById("map"), mapOptions);
+        }
+        function resetMap() {
+            document.getElementById('map').style.width = '0px';
+            document.getElementById('map').style.height = '0px';
+            document.getElementById('map').classList.remove('mb-5');
+            document.getElementById("formAdd").reset();
+            "use strict";
+            initMap(0, 0);
+        }
+    </script>
+{% endblock %}

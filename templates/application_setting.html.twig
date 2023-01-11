@@ -1,0 +1,13 @@
+{% extends "base_setting.html.twig" %}
+
+{% block title 'Mbeyan: Accueil parametre application' %}
+
+{% block body %}
+    <div class="container">
+        <div class="jumbotron">
+            <h3 class="font-weight-bolder text-uppercase text-center">Bienvenu(e)
+                cher(e) {{ app.user.firstName }} {{ app.user.lastName }}</h3>
+            <p class="text-center mt-3">Page setting de l'application mbeyan !</p>
+        </div>
+    </div>
+{% endblock %}

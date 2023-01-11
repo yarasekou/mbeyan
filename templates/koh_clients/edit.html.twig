@@ -1,0 +1,93 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title 'Mbeyan: gestion des clients' %}
+
+{% block body %}
+    <div class="container">
+        <div class="card">
+            <div class="card-header bg-gradient-dark text-white">
+                <h5 class="font-weight-bold text-uppercase text-white">
+                    <i class="fa fa-user-plus"></i>&nbsp;Modifier client Mbeyan
+                </h5>
+            </div>
+            <div class="card-body">
+                {% for message in app.flashes('error') %}
+                    <div class="col-md-10 offset-md-1 alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {{ include('koh_clients/_form_edit.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+
+    {#<script>
+        $(document).ready(function () {
+            let val = $('#koh_client_typeCompte').find(":selected").val();
+            if (val !== '') {
+                document.getElementById('Struct1').innerHTML = '';
+                document.getElementById('Struct2').innerHTML = '';
+                let id = +val;
+                loadValue(id);
+            }
+        });
+
+        $('#koh_client_typeCompte').on('change', function (e) {
+            let val = e.target.value;
+            document.getElementById('Struct1').innerHTML = '';
+            document.getElementById('Struct2').innerHTML = '';
+            if (val !== '') {
+                let id = +val;
+                loadValue(id);
+            }
+        });
+
+        function loadValue(id) {
+            $.ajax({
+                url: '/koh/type/compte/get/' + id,
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.isStructure === true) {
+                        let content1 = "<div class=\"col-md-6 form-group\">\n" +
+                            "        <div class=\"form-group\">\n" +
+                            "            <label for=\"nom_structure\">Nom de la structure</label>\n" +
+                            "            <input type=\"text\" value=' {{ kohUtilisateur.structure.name }} ' placeholder=\"Nom de la structure\" class=\"form-control\" required id=\"nom_structure\"\n" +
+                            "                   name=\"nom_structure\">\n" +
+                            "        </div>\n" +
+                            "    </div>\n" +
+                            "    <div class=\"col-md-6 form-group\">\n" +
+                            "        <div class=\"form-group\">\n" +
+                            "            <label for=\"adresse_structure\">Adresse de la structure</label>\n" +
+                            "            <input type=\"text\" value='{{ kohUtilisateur.structure.adresse }}' class=\"form-control\" placeholder=\"Adresse de la structure\" id=\"adresse_structure\"\n" +
+                            "                   name=\"adresse_structure\">\n" +
+                            "        </div>\n" +
+                            "    </div>";
+
+                        let content2 = "<div class=\"col-md-6 form-group\">\n" +
+                            "        <div class=\"form-group\">\n" +
+                            "            <label for=\"tel_structure\">Téléphone de la structure</label>\n" +
+                            "            <input type=\"text\" value='{{ kohUtilisateur.structure.telephone }}' placeholder=\"Téléphone de la structure\" class=\"form-control\" id=\"tel_structure\"\n" +
+                            "                   name=\"tel_structure\">\n" +
+                            "        </div>\n" +
+                            "    </div>\n" +
+                            "    <div class=\"col-md-6 form-group\">\n" +
+                            "        <div class=\"form-group\">\n" +
+                            "            <label for=\"logo_structure\">Logo de la structure</label>\n" +
+                            "            <input type=\"file\" class=\"form-control\" required id=\"logo_structure\"\n" +
+                            "                   name=\"logo_structure\">\n" +
+                            "        </div>\n" +
+                            "    </div>";
+
+                        document.getElementById('Struct1').innerHTML = content1;
+                        document.getElementById('Struct2').innerHTML = content2;
+                    }
+                }
+            });
+        }
+    </script>#}
+
+{% endblock %}

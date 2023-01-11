@@ -1,0 +1,15 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Edit TypeDocumentPropriete{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h5 class="card-header bg-dark text-white font-weight-bolder text-uppercase bg-dark text-white">Modifié le type de document de proprieté</h5>
+        <div class="card-body text-uppercase font-weight-bold">
+            {{ include('type_document_propriete/_form.html.twig', {'button_label': 'MODIFIER'}) }}
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-primary font-weight-bolder text-uppercase" href="{{ path('type_document_propriete_index') }}">Retourner à la liste</a>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Nouveau type usage bien{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h5 class="card-header bg-dark text-white font-weight-bolder text-uppercase">Nouveau type usage de bien</h5>
+
+        <div class="card-body font-weight-bolder text-uppercase">
+            {{ include('type_usage_bien/_form.html.twig') }}
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-primary font-weight-bolder text-uppercase" href="{{ path('type_usage_bien_index') }}">Retourner à la liste</a>
+        </div>
+    </div>
+{% endblock %}

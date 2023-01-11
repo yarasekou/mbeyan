@@ -1,0 +1,16 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Nouveau type acquisition{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h5 class="card-header bg-dark text-white font-weight-bolder text-uppercase">nouveau type acquisition</h5>
+        <div class="card-body font-weight-bold text-uppercase">
+            {{ include('type_acquisition/_form.html.twig') }}
+        </div>
+
+        <div class="card-footer">
+            <a href="{{ path('type_acquisition_index') }}" class="btn btn-primary text-uppercase font-weight-bolder">Retourner à la liste</a>
+        </div>
+    </div>
+{% endblock %}

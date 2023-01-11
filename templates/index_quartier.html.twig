@@ -1,0 +1,69 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %} La liste des quartier enregistré {% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bold text-uppercase">La liste des quartiers</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsiv">
+        {% if quartiers is not empty %}
+            <table class="table text-center table-bordered table-hover font-weight-bold text-uppercase table-responsive-sm table-striped mt-3 mb-3">
+                <thead>
+                <tr class="bg-dark text-white">
+                    <th>Nom</th>
+                    <th>Latitude</th>
+                    <th>Longitude</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for quartier in quartiers %}
+                    <tr>
+                        <td>{{ quartier.name }} {{ quartier.commune.name|upper }}</td>
+                        <td>
+                            {% if quartier.latitude == null %}
+                                <span class="badge badge-danger">non défini</span>
+                            {% else %}
+                                <span class="badge badge-success">{{ quartier.latitude }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if quartier.longitude == null %}
+                                <span class="badge badge-danger">non défini</span>
+                            {% else %}
+                                <span class="badge badge-success">{{ quartier.longitude }}</span>
+                            {% endif %}
+                        </td>
+
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="font-weight-bolder text-uppercase">AUCUN ENREGISTREMENT</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else%}
+            <div class="alert alert-danger text-center text-uppercase font-weight-bolder">AUCUN ENREGISTREMENT</div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Welcome!{% endblock %}</title>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="shortcut icon" href="{{ asset('images/logo-mbeyan.jpeg') }}" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/font/font.css') }}"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('dashboard/css/perfect-scrollbar.css') }}"/>
+    <link rel="stylesheet" href="{{ asset('dashboard/css/coreui.css') }}">
+    <link href="{{ asset('dashboard/css/select2.css') }}" rel="stylesheet"/>
+    <script src="{{ asset('dashboard/js/select2.js') }}"></script>
+    <script src="{{ asset('dashboard/js/jquery.js') }}"></script>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body class="c-app">
+<div class="c-sidebar c-sidebar-light c-sidebar-fixed c-sidebar-lg-show" id="sidebar">
+    <div class="c-sidebar-brand bg-light d-lg-down-none">
+        <img class="c-sidebar-brand-full" width="60" height="46" alt="Mbeyan Logo"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+        <img class="c-sidebar-brand-minimized" width="46" height="46" alt="Mbeyan Logo"
+             src="{{ asset('images/logo-mbeyan.jpeg') }}">
+    </div>
+    <ul class="c-sidebar-nav">
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" {% if app.user.roleSuperAdminAndIsAdmin %} href="{{ path('super_admin.application_setting') }}" {% else %} href="{{ path('super_admin.home') }}" {% endif %} >
+                <i class="fa fa-cogs c-sidebar-nav-icon "></i>CONFIGURATION</a>
+        </li>
+        <li class="c-sidebar-nav-title">GESTIONS DES BIENS</li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('bien_client_new') }}">
+                <i class="fas fa-plus c-sidebar-nav-icon"></i>NOUVEAU BIEN</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('bien_client_index') }}">
+                <i class="fas fa-list-ol c-sidebar-nav-icon"></i>LA LISTE DES BIEN</a>
+        </li>
+        <li class="c-sidebar-nav-item">
+            <a class="c-sidebar-nav-link" href="{{ path('super_admin.bien_mbeyan_sur_map') }}">
+                <i class="fas fa-map-marker-alt c-sidebar-nav-icon"></i>BIEN SUR MAP</a>
+        </li>
+        <li class="c-sidebar-nav-divider"></li>
+        <li class="c-sidebar-nav-divider"></li>
+    </ul>
+</div>
+<div class="c-wrapper c-fixed-components">
+    <header class="c-header c-header-light bg-dark c-header-fixed c-header-with-subheader">
+        <button class="c-header-toggler c-class-toggler d-lg-none mfe-auto" type="button" data-target="#sidebar"
+                data-class="c-sidebar-show">
+            <i class="fa fa-align-justify text-white c-icon c-icon-lg"></i>
+        </button>
+        <button class="c-header-toggler c-class-toggler mfs-3 d-md-down-none" type="button" data-target="#sidebar"
+                data-class="c-sidebar-lg-show" responsive="true">
+            <i class="fa fa-align-justify text-white c-icon c-icon-lg"></i>
+        </button>
+        <ul class="c-header-nav ml-auto text-white mr-4">
+            <li class="c-header-nav-item dropdown">
+                <a class="c-header-nav-link" data-toggle="dropdown" href="#" role="button" aria-haspopup="true"
+                   aria-expanded="false">
+                    <span class="text-uppercase text-white font-weight-bold mr-3">{{ app.user.firstName }} {{ app.user.lastName }}</span>
+                    <div class="c-avatar">
+                        <img
+                                class="c-avatar-img" {% if app.user.imageProfile != null %} src="/images/users/{{ app.user.imageProfile }}" {% else %} src="{{ asset('images/user.jpg') }}" {% endif %}
+                                alt="profile utilisateur">
+                    </div>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right pt-0">
+                    <div class="dropdown-header bg-light py-2">
+                        <strong>MON COMPTE</strong>
+                    </div>
+                    <a class="dropdown-item" href="{{ path('koh_utilisateur_show', {'id': app.user.id}) }}">
+                        <i class="fa fa-user text-dark c-icon"></i>
+                        &nbsp;PROFILE</a>
+                    <a class="dropdown-item" href="{{ path('super_admin.application_setting') }}">
+                        <i class="fa fa-cogs text-dark c-icon"></i>
+                        &nbsp;&nbsp;APPLICATION</a>
+                    <a class="dropdown-item" href="{{ path('app_logout') }}">
+                        <i class="fa fa-sign-out-alt text-dark c-icon"></i>
+                        &nbsp;DECONNEXION</a>
+                </div>
+            </li>
+        </ul>
+        {% block breadcrump %}{% endblock %}
+    </header>
+    <div class="c-body">
+        <main class="c-main">
+            <div class="container-fluid"> {% block body %}{% endblock %}
+            </div>
+        </main>
+        <footer class="bg-dark">
+            <div class="container">
+                <p class="text-center text-white font-weight-bolder text-uppercase"><br>KOH POLY
+                    EXPERTISE {{ "now"|date('Y') }} &copy;. Tous droits réservés</p>
+            </div>
+        </footer>
+    </div>
+</div>
+<script src="{{ asset('dashboard/js/perfect-scrollbar.js') }}"></script>
+<script src="{{ asset('dashboard/js/popper.js') }}"></script>
+<script src="{{ asset('dashboard/js/coreui.js') }}"></script>
+{% block javascripts %}{% endblock %}
+</body>
+</html>

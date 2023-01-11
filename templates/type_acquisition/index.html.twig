@@ -1,0 +1,91 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}La liste des types acquisition{% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bolder text-uppercase">Les types acquisitions de bien</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    <div class="table-responsive">
+        {% if  type_acquisitions is not empty %}
+            <table class="table table-striped table-hover table-bordered font-weight-bold text-uppercase table-responsive-sm text-center mt-3">
+                <thead>
+                <tr class="bg-dark text-white text-uppercase">
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Pour structure</th>
+                    <th>action</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for type_acquisition in type_acquisitions %}
+                    <tr>
+                        <td>{{ type_acquisition.name }}</td>
+                        <td>{{ type_acquisition.description }}</td>
+                        <td>
+                            {% if type_acquisition.isBienForStructure %}
+                                <span class="badge badge-success">OUI</span>
+                            {% else %}
+                                <span class="badge badge-warning">NON</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                {% if app.user.roleSuperAdminAndIsAdmin %}
+                                    <a class="btn btn-sm btn-warning"
+                                       href="{{ path('type_acquisition_edit', {'id': type_acquisition.id}) }}"><i
+                                                class="fa fa-edit"></i></a>
+                                    <form style="display: inline" method="post"
+                                          action="{{ path('type_acquisition_delete', {'id': type_acquisition.id}) }}"
+                                          onsubmit="return confirm('La suppression de ce type d\'acquisition supprime aussi toute expertise associée. Êtes-vous sû(e)');">
+                                        <input type="hidden" name="_method" value="DELETE">
+                                        <input type="hidden" name="_token"
+                                               value="{{ csrf_token('delete' ~ type_acquisition.id) }}">
+                                        <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                                    </form>
+                                {% else %}
+                                    <button class="btn btn-sm btn-dark disabled">AUCUNE ACTION</button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-uppercase font-weight-bolder">AUCUN ENREGISTREMENT</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-danger font-weight-bolder text-center text-uppercase">
+                AUCUN ENREGISTREMENT
+            </div>
+        {% endif %}
+    </div>
+
+    {% if app.user.roleSuperAdminAndIsAdmin %}
+        <a href="{{ path('type_acquisition_new') }}"
+           class="btn btn-primary mt-3 font-weight-bolder text-uppercase mt-3 mb-3">Créer
+            un nouveau</a>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

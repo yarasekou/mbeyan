@@ -1,0 +1,18 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Modification de mon compte{% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bolder text-uppercase">Modification nouvel administrateur mbeyan</h5>
+    <hr>
+    <div class="card mt-3 mb-5">
+        <h5 class="card-header bg-dark text-white font-weight-bolder text-uppercase">Modification de compte</h5>
+        <div class="card-body font-weight-bolder text-uppercase">
+            {{ include('koh_utilisateur/_form.html.twig', {'button_label': 'MODIFIER'}) }}
+        </div>
+        <div class="card-footer">
+            <a href="{{ path('koh_utilisateur_index') }}"
+               class="font-weight-bolder text-uppercase text-decoration-none">Afficher la liste des utilisateurs</a>
+        </div>
+    </div>
+{% endblock %}

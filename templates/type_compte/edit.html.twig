@@ -1,0 +1,16 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}Modifier le type de compte{% endblock %}
+
+{% block body %}
+    <div class="card">
+        <h5 class="card-header bg-dark text-white font-weight-bolder text-uppercase">Modifier le type de compte</h5>
+        <div class="card-body font-weight-bold text-uppercase">
+            {{ include('type_compte/_form.html.twig', {'button_label': 'MODIFIER'}) }}
+        </div>
+        <div class="card-footer">
+            <a class="btn btn-primary text-uppercase font-weight-bolder" href="{{ path('type_compte_index') }}">Retourner
+                à la liste</a>
+        </div>
+    </div>
+{% endblock %}

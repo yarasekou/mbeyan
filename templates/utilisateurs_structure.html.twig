@@ -1,0 +1,102 @@
+{% extends 'base_structure.html.twig' %}
+
+{% block body %}
+    <h5 class="font-weight-bold text-uppercase">
+        &nbsp;Les utilisateurs de {{ app.user.structure.name }}
+    </h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="col-md-8 offset-md-2 alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="col-md-8 offset-md-2 alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+   <div class="table-responsive">
+       <table class="table table-striped table-bordered font-weight-bold text-uppercase table-hover text-center">
+           <thead>
+           <tr class="bg-gradient-dark text-white">
+               <th>NOM</th>
+               <th>EMAIL</th>
+               <th>STATUT</th>
+               <th>ACTIF</th>
+               <th>ADMIN</th>
+               <th>ACTION</th>
+           </tr>
+           </thead>
+           <tbody>
+           {% for user in koh_utilisateurs %}
+               <tr>
+                   <td>{{ user.firstName }} {{ user.lastName }}</td>
+                   <td>{{ user.email }}</td>
+                   <td>
+                       {% if user.status == 'complete' %}
+                           <span class="badge badge-info">{{ user.status }}</span>
+                       {% else %}
+                           <span class="badge badge-danger">{{ user.status }}</span>
+                       {% endif %}
+                   </td>
+                   <td>
+                       {% if user.isActived %}
+                           <span class="badge badge-primary">oui</span>
+                       {% else %}
+                           <span class="badge badge-danger">non</span>
+                       {% endif %}
+                   </td>
+                   <td>
+                       {% if user.isAdmin %}
+                           <span class="badge badge-success">oui</span>
+                       {% else %}
+                           <span class="badge badge-danger">non</span>
+                       {% endif %}
+                   </td>
+                   <td>
+                       <div class="btn-group-sm">
+                           {% if app.user.id == user.id %}
+                               <a href="{{ path('admin.utilisateur.edit', {'id': user.id}) }}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
+                           {% endif %}
+                           {% if app.user.hasRoleAdminAndIsAdmin() %}
+                               {% if user.isActived %}
+                                   <a href="{{ path('admin.utilisateurs.desactive-user-account', {'id': user.id}) }}"
+                                      class="btn btn-dark"><i class="fa fa-arrow-down"></i></a>
+                               {% else %}
+                                   <a href="{{ path('admin.utilisateurs.active-user-account', {'id': user.id}) }}"
+                                      class="btn btn-primary"><i class="fa fa-arrow-up"></i></a>
+                               {% endif %}
+                               <form style="display: inline" method="post"
+                                     action="{{ path('admin.utilisateur.delete', {'id': user.id}) }}"
+                                     onsubmit="return confirm('Êtes-vous sûr(e) de supprimer cet utilisateur ?');">
+                                   <input type="hidden" name="_method" value="DELETE">
+                                   <input type="hidden" name="_token"
+                                          value="{{ csrf_token('delete' ~ user.id) }}">
+                                   <button class="btn btn-sm btn-danger"><i class="fa fa-trash-alt"></i></button>
+                               </form>
+                           {% endif %}
+                       </div>
+                   </td>
+               </tr>
+           {% endfor %}
+           </tbody>
+       </table>
+   </div>
+
+{% endblock %}
+{% block title %}
+    Les utilisateurs de {{ app.user.structure.name }}
+{% endblock %}
+
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}
+
+

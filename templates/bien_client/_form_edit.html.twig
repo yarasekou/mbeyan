@@ -1,0 +1,333 @@
+{{ form_start(form, {'multipart': true}) }}
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="numero_expertise">Numero expertise</label>
+            <input id="numero_expertise" {% if bien is defined %} value="{{ bien.lastExpertise.NumeroExpertise }}"
+
+            {% endif %} type="text" class="form-control" name="numero_experise" required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="numero_dossier">Numero dossier mbeyan</label>
+            <input id="numero_dossier" {% if bien is defined %} value="{{ bien.lastExpertise.dossierMbeyan.numeroDossier }}"
+
+            {% endif %} type="text" class="form-control" name="numero_dossier" required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="superficie">Superficie</label>
+            <input id="superficie" {% if bien is defined %}
+                value="{{ bien.lastExpertise.superficie }}"
+            {% endif %} type="text" class="form-control" name="superifie" required>
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="latitude">Latitude</label>
+            <input id="latitude" {% if bien is defined %}
+                value="{{ bien.lastExpertise.latitude }}"
+            {% endif %} type="text" class="form-control" name="latitude" required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="longitude">Longitude</label>
+            <input id="longitude" {% if bien is defined %}
+                value="{{ bien.lastExpertise.longitude }}"
+            {% endif %} type="text" class="form-control" name="longitude" required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="lastEvaluationPrice">Prix evaluation</label>
+            <input id="lastEvaluationPrice" {% if bien is defined %}
+                value="{{ bien.lastExpertise.lastEvaluationPrice }}"
+            {% endif %} type="number" class="form-control" name="lastEvaluationPrice" required>
+        </div>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="bien_client_last_evaluation_date">Date dernière évaluation</label>
+            <input id="bien_client_last_evaluation_date" {% if bien is defined %}
+                value="{{ bien.lastExpertise.dateEvaluation|date('d/m/Y') }}"
+            {% endif %} name="last_evaluation_date" type="date" class="form-control"
+                   required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="bien_client_next_evaluation_date">Date prochaine évaluation</label>
+            <input id="bien_client_next_evaluation_date" {% if bien is defined %}
+                value="{{ bien.lastExpertise.dateNextEvaluation|date('d/m/Y') }}"
+            {% endif %} name="next_evaluation_date" type="date" class="form-control"
+                   required>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <label for="bien_client_typeAcquisition">Type acquisition</label>
+        <select id="bien_client_typeAcquisition" name="bien_client[typeAcquisition]" required="required"
+                class="form-control">
+            <option value="" selected="selected">-- Selectionner un type acquisition --</option>
+
+        </select>
+    </div>
+</div>
+
+<div class="form-row align-items-end" id="formAdjuction">
+
+</div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        <div class="form-group"><label class="required" for="bien_client_typeUsageBien">Type Usage bien</label><select
+                    id="bien_client_typeUsageBien" name="bien_client[typeUsageBien]" required="required"
+                    class="form-control">
+
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group"><label class="required" for="bien_client_typeDocument">Type document</label><select
+                    id="bien_client_typeDocument" name="bien_client[typeDocument]" required="required"
+                    class="form-control">
+                <option value="" selected="selected">-- Selectionner un type document --</option>
+
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group"><label class="required" for="bien_client_typeBien">Type de bien</label><select
+                    id="bien_client_typeBien" name="bien_client[typeBien]" required="required" class="form-control">
+                <option value="" selected="selected">-- Selectionner un type bien --</option>
+
+            </select></div>
+    </div>
+</div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        {{ form_row(form.numeroDocument) }}
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="nomProprietaire">Nom proprietaire</label>
+            <input type="text" class="form-control" id="nomProprietaire"
+                   placeholder="Nom si client different du proprietaire" name="nomProprietaire">
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="prenomProprietaire">Prénom proprietaire</label>
+            <input type="text" class="form-control" id="prenomProprietaire"
+                   placeholder="Prénom si client different du proprietaire" name="prenomProprietaire">
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-end" id="infoFoncier">
+
+</div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-6 form-group">
+        {{ form_row(form.typeCompte) }}
+    </div>
+    <div class="col-md-6 form-group">
+        <div class="form-group">
+            <label for="clientKoh">Client mbeyan</label>
+            <select name="client_koh" id="clientKoh" class="form-control" required>
+                <option value="">-- Selectionner le client mbeyan --</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-end" id="infoClientBanque1">
+
+</div>
+
+<div class="form-row align-items-end" id="infoClientBanque2">
+
+</div>
+
+<div class="form-row">
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="date_fin_dation">Date fin dation</label>
+            <input type="date" id="date_fin_dation" name="date_fin_dation" class="form-control">
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="date_sorti_immobilisation">Date sorti immobilisation</label>
+            <input type="date" id="date_sorti_immobilisation" name="date_sorti_immobilisation" class="form-control">
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="iconImage">Icon associé</label>
+            <input type="file" accept="image/x-png,image/gif,image/jpeg" name="iconImage" class="form-control" required>
+        </div>
+    </div>
+</div>
+
+
+<div class="form-row" id="clientParticulier">
+
+</div>
+
+<div class="form-row" id="clientStructure">
+
+</div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        {{ form_row(form.region) }}
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="cercle">Cercle</label>
+            <select name="cercle" id="cercle" class="form-control" required>
+                <option value="">-- Selectionner un cercle --</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="quartier">Quartier/Ville</label>
+            <input {% if bien is defined %}
+                value="{{ bien.quartier.name }}"
+            {% endif %} type="text" class="form-control" name="bien_quartier" id="quartier">
+        </div>
+    </div>
+</div>
+
+<div id="map"></div>
+
+<div class="form-row align-items-end">
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="memo">Memo</label>
+            <textarea {% if bien is defined %}
+                value="{{ bien.lastExpertise.memo }}"
+            {% endif %} class="form-control" name="memo" id="memo" cols="30" rows="5"></textarea>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="remarque">Remarque</label>
+            <textarea {% if bien is defined %}
+                value="{{ bien.lastExpertise.remarque }}"
+            {% endif %} class="form-control" name="remarque" id="remarque" cols="30" rows="5"></textarea>
+        </div>
+    </div>
+    <div class="col-md-4 form-group">
+        <div class="form-group">
+            <label for="other">Autre</label>
+            <textarea {% if bien is defined %}
+                value="{{ bien.lastExpertise.other }}"
+            {% endif %} class="form-control" name="other" id="other" cols="30" rows="5"></textarea>
+        </div>
+    </div>
+</div>
+
+<div class="form-row align-items-start">
+    <div class="col-md-6">
+        <div id="form_image">
+            <div class="form-row align-items-start">
+                <div class="col-md-10">
+                    <div class="form-group">
+                        <label for="">Photo</label>
+                        <input type="file" class="form-control" name="document_image">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group mt-4">
+                        <button type="button" id="addImage" class="btn btn-success"><i class="fa fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div id="form_propriete_pdf">
+            <div class="form-row align-items-start">
+                <div class="col-md-10">
+                    <div class="form-group">
+                        <label for="">Document proprieté pdf</label>
+                        <input type="file" class="form-control" name="document_propriete_pdf">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group mt-4">
+                        <button type="button" id="addProprietePdf" class="btn btn-success"><i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="form-row align-items-start">
+    <div class="col-md-6">
+        <div id="form_expertise_pdf">
+            <div class="form-row align-items-start">
+                <div class="col-md-10">
+                    <div class="form-group">
+                        <label for="">Document expertise pdf</label>
+                        <input type="file" class="form-control" name="document_expertise_pdf">
+                    </div>
+                </div>
+                <div class="col-md-1 mt-4">
+                    <div class="form-group">
+                        <button type="button" id="addExpertisePdf" class="btn btn-success"><i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div id="form_other">
+            <div class="form-row align-items-start">
+                <div class="col-md-10">
+                    <div class="form-group">
+                        <label for="">Autre document</label>
+                        <input type="file" class="form-control" name="document_other">
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group mt-4">
+                        <button type="button" id="addOtherDoc" class="btn btn-success"><i class="fa fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="col-md-6 form-group">
+        <input type="hidden" name="quartier_latitude" id="quartier_latitude_hidden">
+    </div>
+
+    <div class="col-md-6 form-group">
+        <input type="hidden" name="quartier_longitude" id="quartier_longitude_hidden">
+    </div>
+</div>
+
+{{ form_widget(form) }}
+<button class="btn btn-primary float-right">{{ button_label|default('ENREGISTRER') }}</button>
+{{ form_end(form) }}

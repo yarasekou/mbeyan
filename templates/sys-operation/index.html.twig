@@ -1,0 +1,56 @@
+{% extends 'base_setting.html.twig' %}
+
+{% block title %}la liste des regions {% endblock %}
+
+{% block body %}
+    <h5 class="font-weight-bold text-uppercase">
+        &nbsp;Les opérations de l'application</h5>
+    <hr>
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('danger') %}
+        <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {% if operations is not empty %}
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered text-center text-uppercase">
+                <thead class="bg-gradient-dark text-white font-weight-bold text-uppercase ">
+                <tr>
+                    <th>DATE</th>
+                    <th>PAR</th>
+                    <th>OPERATION</th>
+                    <th>DESCRIPTION</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for operation in operations %}
+                    <tr>
+                        <td>{{ operation.createdAt|date('d-m-Y h:m:s') }}</td>
+                        <td>{{ operation.kohUtilisateur.firstName }} {{ operation.kohUtilisateur.lastName }}</td>
+                        <td>{{ operation.description }}</td>
+                        <td>{{ operation.userAffected }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="float-right mt-3 mb-5">{{ knp_pagination_render(operations) }}</div>
+    {% endif %}
+
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(".alert").delay(5000).slideUp(200, function () {
+            $(this).alert('close');
+        });
+    </script>
+{% endblock %}

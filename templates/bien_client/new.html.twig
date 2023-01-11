@@ -1,0 +1,307 @@
+{% extends 'base_koh_utilisateur.html.twig' %}
+
+{% block title %}
+    Nouveau bien
+{% endblock %}
+{% block stylesheets %}
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE&callback=initMap&libraries=&v=weekly"
+            defer></script>
+{% endblock %}
+
+
+{% block body %}
+    <div class="col-md-12">
+        <div class="card">
+            <h5 class="card-header font-weight-bolder text-uppercase">ENREGISTREMENT DE NOUVEAU BIEN DES CLIENTS</h5>
+            <div class="card-body">
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+
+                {% for message in app.flashes('danger') %}
+                    <div class="alert alert-danger text-center text-uppercase font-weight-bolder mt-3 mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {{ include('bien_client/_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cleave.js/1.0.2/cleave.min.js"
+            integrity="sha512-SvgzybymTn9KvnNGu0HxXiGoNeOi0TTK7viiG0EGn2Qbeu/NFi3JdWrJs2JHiGA1Lph+dxiDv5F9gDlcgBzjfA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+
+        $(document).ready(function () {
+            $('#bien_client_typeCompte').val('');
+            $('#bien_client_region').val('');
+        });
+        $('#bien_client_typeCompte').on('change', function (e) {
+            let type = e.target.value;
+            $('#clientKoh').empty().append($('<option>', {
+                value: '',
+                text: "-- Selectionner le client --"
+            }));
+            document.getElementById('infoClientBanque1').innerHTML = "";
+            document.getElementById('infoClientBanque2').innerHTML = "";
+            if (type !== '') {
+                $.ajax({
+                    url: '/koh_utilisateur/clients_by_type',
+                    type: 'post',
+                    dataType: 'json',
+                    data: {
+                        'type': type
+                    },
+                    success: function (data) {
+                        console.log('data :: ' + JSON.stringify(data));
+                        $('#clientKoh').empty().append($('<option>', {
+                            value: '',
+                            text: "-- Selectionner le client mbeyan --"
+                        }));
+                        $.each(data, function (index, client) {
+                            $('#clientKoh').append($('<option>', {
+                                value: client['id'],
+                                text: client['email'].toUpperCase()
+                            }));
+                        });
+
+                        // TO DO RECCUPERATION DE TYPE DE COMPTE
+
+                        let typeId = $('#bien_client_typeCompte').val();
+                        if (typeId !== '') {
+                            $.ajax({
+                                url: '/koh/type/compte/get/' + typeId,
+                                dataType: 'json',
+                                'type': 'GET',
+                                success: function (data) {
+                                    if (data['isStructure'] === true) {
+                                        let info1 = "<div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group text-uppercase\">\n" + "            <label for=\"nom_client_banque\">Client de la structure</label>\n" + "            <input id=\"nom_client_banque\" type=\"text\" class=\"form-control text-uppercase\" name=\"nom_client_banque\" required\n" + "                   placeholder=\"nom & prénom\">\n" + "        </div>\n" + "    </div>\n" + "    <div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"numero_compte_client_banque\">Numero de compte client</label>\n" + "            <input id=\"numero_compte_client_banque\" type=\"text\" class=\"form-control\" name=\"numero_client_banque\"\n" + "                    placeholder=\"compte_01_12_2020 optionnel\">\n" + "        </div>\n" + "    </div>";
+                                        let info2 = "<div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group text-uppercase\">\n" + "            <label for=\"contact_client_banque\">Contact du client</label>\n" + "            <input id=\"contact_client_banque\" type=\"text\" class=\"form-control text-uppercase\" name=\"contact_client_banque\" \n" + "                   placeholder=\"tél ou adresse émail\">\n" + "        </div>\n" + "    </div>\n" + "    <div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"adresse_compte_client_banque\">Adresse du client</label>\n" + "            <input id=\"adresse_compte_client_banque\" type=\"text\" class=\"form-control\" name=\"adresse_client_banque\"\n" + "                    placeholder=\"ville/quartier/rue\">\n" + "        </div>\n" + "    </div>";
+                                        document.getElementById('infoClientBanque1').innerHTML = info1;
+                                        document.getElementById('infoClientBanque2').innerHTML = info2;
+                                    }
+                                },
+                                error: function (error) {
+                                    console.log('error == ' + JSON.parse(error))
+                                }
+                            })
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#bien_client_region').on('change', function (e) {
+            $('#cercle').empty();
+            if (e.target.value !== '') {
+                loadCercle(+e.target.value);
+            }
+
+            function loadCercle(id) {
+                $.ajax({
+                    url: '/cercle/region_by_cercle/' + id,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log('data ' + data.length);
+                        $('#cercle').empty().append($('<option>', {
+                            value: '',
+                            text: '-- Selectionner un cercle --'
+                        }));
+
+                        $.each(data, function (index, cercle) {
+                            $('#cercle').append($('<option>', {
+                                value: cercle['id'],
+                                text: cercle['libelle'].toUpperCase()
+                            }));
+                        });
+                    }
+                })
+            }
+        });
+
+        /*$('#cercle').on('change', function (e) {
+            $('#commune').empty();
+            if (e.target.value !== '') {
+                loadCommune(+e.target.value);
+            }
+
+            function loadCommune(id) {
+                $.ajax({
+                    url: '/commune/commune_by_cercle/' + id,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#commune').empty().append($('<option>', {
+                            value: '',
+                            text: '-- Selectionner une commune --'
+                        }));
+                        $.each(data, function (index, commune) {
+                            $('#commune').append($('<option>', {
+                                value: commune['id'],
+                                text: commune['libelle']
+                            }));
+                        });
+
+                    }
+                });
+            }
+        });
+
+        $('#commune').on('change', function (e) {
+            $('#quartier').empty();
+            if (e.target.value !== '') {
+                loadQuartier(+e.target.value);
+            }
+
+            function loadQuartier(id) {
+                $.ajax({
+                    url: '/quartier/quartier_by_commune/' + id,
+                    type: 'get',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#quartier').empty().append($('<option>', {
+                            value: '',
+                            text: '-- Selectionner un quartier --'
+                        }));
+                        $.each(data, function (index, quartier) {
+                            console.log('id :: ' + quartier['libelle']);
+                            $('#quartier').append($('<option>', {
+                                value: quartier['id'],
+                                text: quartier['libelle']
+                            }));
+                        });
+
+                    }
+                });
+            }
+        });*/
+
+        $('#bien_client_typeDocument').on('change', function () {
+            let type = $('#bien_client_typeDocument').find(":selected").text()
+            document.getElementById('infoFoncier').innerHTML = "";
+            if (type.toLowerCase() === 'titre foncier') {
+                document.getElementById('infoFoncier').innerHTML = "<div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"volume_foncier\">Volume</label>\n" + "            <input type=\"text\" class=\"form-control\" name=\"volume_foncier\" id=\"volume_foncier\">\n" + "        </div>\n" + "    </div>\n" + "    <div class=\"col-md-6 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"f_foncier\">F</label>\n" + "            <input type=\"text\" class=\"form-control\" name=\"foncier_f\" id=\"f_foncier\">\n" + "        </div>\n" + "    </div>";
+            }
+        });
+
+        $('#bien_client_typeAcquisition').on('change', function (e) {
+            let id = e.target.value;
+            typeAcquisitionById(+id);
+        });
+
+        $('#quartier').on('change', function (e) {
+            if (e.target.value !== '') {
+                let quartier = e.target.value;
+                let cercle = $('#cercle').find(":selected").text();
+                loadMap(quartier, cercle);
+            }
+
+            function loadMap(quartier, cercle) {
+                let str = 'https://maps.googleapis.com/maps/api/geocode/json?address=' + quartier + ',' + cercle + ',Mali&key=AIzaSyCo18VhOGOgmI7qIKBjSB5kq9tJYp5HWEE';
+                let url = encodeURI(str);
+                $.ajax({
+                    url: url,
+                    datatype: 'json',
+                    type: 'get',
+                    success: function (data) {
+                        if (data.status === 'OK') {
+                            "use strict";
+                            let i = 0;
+                            for (const d of data.results) {
+                                if (i === 0) {
+                                    initMap(d);
+                                    document.getElementById('map').style.width = '100%';
+                                    document.getElementById('map').style.height = '400px';
+                                    document.getElementById('map').classList.add('mt-3');
+                                    document.getElementById('map').classList.add('mb-3');
+                                    document.getElementById('quartier_latitude_hidden').value = d.geometry.location.lat;
+                                    document.getElementById('quartier_longitude_hidden').value = d.geometry.location.lng;
+                                }
+                                i++;
+                            }
+                        } else {
+                            alert('Impossible de trouver les coordonnées');
+                            "use strict";
+                            initMap(null);
+                        }
+                    }
+                });
+            }
+        });
+
+        function initMap(d) {
+            if (d === null || d === undefined) {
+                new google.maps.Map(document.getElementById("map"), {
+                    center: {
+                        lat: 0,
+                        lng: 0
+                    },
+                    zoom: 8,
+                    mapTypeControlOptions: {
+                        mapTypeIds: [
+                            'roadmap',
+                            'satellite',
+                            'hybrid',
+                            'terrain',
+                            'styled_map'
+                        ]
+                    }
+                });
+
+                document.getElementById('map').style.width = '0';
+                document.getElementById('map').style.height = '0';
+                document.getElementById('map').classList.remove('mt-3');
+                document.getElementById('map').classList.remove('mb-3');
+                document.getElementById('quartier_latitude_hidden').value = '';
+                document.getElementById('quartier_longitude_hidden').value = '';
+            } else {
+                let lt = document.getElementById('latitude').value;
+                let lg = document.getElementById('longitude').value;
+                let myLatLng = {lat: +lt, lng: +lg};
+                let map = new google.maps.Map(document.getElementById("map"), {
+                    center: {
+                        lat: +lt,
+                        lng: +lg
+                    },
+                    zoom: 18,
+                    mapTypeId: 'satellite'
+                });
+
+                new google.maps.Marker({
+                    position: myLatLng,
+                    map: map,
+                    title: "COORDONNEE BIEN",
+                });
+            }
+        }
+
+        function typeAcquisitionById(id) {
+            $.ajax({
+                url: '/koh/type-acquisition/get/' + id,
+                type: 'get',
+                dataType: 'json',
+                success: function (data) {
+                    if (data.isBienForStructure === true) {
+                        document.getElementById('formAdjuction').innerHTML = "<div class=\"col-md-4 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"date_entree\">Date entrée</label>\n" + "            <input type=\"date\" class=\"form-control\" name=\"date_entree\" id=\"date_entree\">\n" + "        </div>\n" + "    </div>\n" + "    <div class=\"col-md-4 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"montant_acquisition\">Montant acquisition</label>\n" + "            <input type=\"number\" class=\"form-control\" name=\"montant_acquisition\" id=\"montant_acquisition\">\n" + "        </div>\n" + "    </div>\n" + "    <div class=\"col-md-4 form-group\">\n" + "        <div class=\"form-group\">\n" + "            <label for=\"frais_acquisition\">Frais acquisition</label>\n" + "            <input type=\"number\" id=\"frais_acquisition\" name=\"frais_acquisition\" class=\"form-control\">\n" + "        </div>\n" + "    </div>";
+                    } else {
+                        document.getElementById('formAdjuction').innerHTML = "";
+                    }
+                },
+                error: function (error) {
+                    console.log('error => ' + JSON.stringify(error));
+                }
+            })
+        }
+    </script>
+    <script>
+        document.querySelectorAll('#lastEvaluationPrice').forEach(inp => new Cleave(inp, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand'
+        }));
+    </script>
+{% endblock %}
